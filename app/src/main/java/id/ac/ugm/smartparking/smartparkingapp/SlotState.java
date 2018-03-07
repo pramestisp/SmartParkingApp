@@ -11,11 +11,16 @@ import android.view.View;
 
 public class SlotState extends View {
     private static final int[] STATE_AVAILABLE = {R.attr.state_available};
+    private static final int[] STATE_UNAVAILABLE = {R.attr.state_unavailable};
 
     private boolean mIsAvailable = false;
+    private boolean mIsUnavailable = false;
 
     public void setAvailable(boolean isAvailable) {
         mIsAvailable = isAvailable;
+    }
+    public void setUnavailable(boolean isUnavailable) {
+        mIsUnavailable = isUnavailable;
     }
 
 
@@ -28,6 +33,9 @@ public class SlotState extends View {
         final int[] drawableState = super.onCreateDrawableState(extraSpace + 2);
         if (mIsAvailable) {
             mergeDrawableStates(drawableState, STATE_AVAILABLE);
+        }
+        if (mIsUnavailable) {
+            mergeDrawableStates(drawableState, STATE_UNAVAILABLE);
         }
         return drawableState;
                 //super.onCreateDrawableState(extraSpace);
