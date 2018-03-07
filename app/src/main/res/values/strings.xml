@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">SmartParkingApp</string>
+    <string name="brand_prompt">Choose your car\'s brand</string>
+
+    <string-array name="car_brands">
+        <item>Chevrolet</item>
+        <item>Daihatsu</item>
+        <item>Honda</item>
+        <item>Hyundai</item>
+        <item>Mazda</item>
+        <item>Mercedes-Benz</item>
+        <item>Mitsubishi</item>
+        <item>Nissan</item>
+        <item>Suzuki</item>
+        <item>Toyota</item>
+    </string-array>
+    <string-array name="car_model_honda">
+        <item>BR-V</item>
+        <item>Brio</item>
+        <item>City</item>
+        <item>CR-V</item>
+        <item>Freed</item>
+        <item>Jazz</item>
+        <item>Mobilio</item>
+    </string-array>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+</resources>
