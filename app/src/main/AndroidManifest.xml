@@ -10,7 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".ChooseTimeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,8 +22,8 @@
             <!--android:label="@string/title_activity_main"-->
             <!--android:theme="@style/AppTheme" />-->
         <!--<activity android:name=".MainActivity"/>-->
-        <activity android:name=".ChooseSlotActivity" />
-        <activity android:name=".ChooseTimeActivity" />
+        <!--<activity android:name=".ChooseSlotActivity" />-->
+        <!--<activity android:name=".ChooseTimeActivity" />-->
 
     </application>
 

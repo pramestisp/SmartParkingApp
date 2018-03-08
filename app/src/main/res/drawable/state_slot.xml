@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item></item>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        app:state_available="true"
+        app:state_unavailable="false"
+        android:drawable="@color/gray"></item>
+
+    <item
+        app:state_available="false"
+        app:state_unavailable="true"
+        android:drawable="@color/gray"></item>
+
+    <item
+        app:state_available="false"
+        app:state_unavailable="false"
+        android:drawable="@color/gray"></item>
 
 </selector>
