@@ -1,14 +1,10 @@
 package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,36 +12,20 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-
-import id.ac.ugm.smartparking.smartparkingapp.apihelper.BaseApiService;
-import id.ac.ugm.smartparking.smartparkingapp.apihelper.UtilsApi;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import id.ac.ugm.smartparking.smartparkingapp.apihelper.LoginRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.apihelper.RegisterRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 
 
 public class RegisterLoginActivity extends AppCompatActivity {
 
     private EditText inputEmail;
     private EditText inputPassword;
+    private EditText inputConfirmPassword;
     private EditText inputName;
     private EditText inputCarType;
     private EditText inputLicenseNo;
+    private TextInputLayout inputConfirmPasswordContainer;
     private TextInputLayout inputNameContainer;
     private TextInputLayout inputLicenseNoContainer;
     private TextInputLayout inputCarTypeContainer;
@@ -58,12 +38,14 @@ public class RegisterLoginActivity extends AppCompatActivity {
 //    private TextView textLogo;
     private ProgressBar progressBar;
 
-    private View.OnClickListener mContext;
-    private BaseApiService mApiService;
+//    private View.OnClickListener mContext;
+//    private BaseApiService mApiService;
     private ProgressDialog loading;
 
     private boolean isLogin = true;
-    private String name, email, car_type, license_no, password = "";
+    //private String name, email, car_type, license_no, password = "";
+
+    private Network network;
 
 
     @Override
@@ -73,19 +55,25 @@ public class RegisterLoginActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        inputEmail = (EditText) findViewById(R.id.etLoginEmail);
-        inputPassword = (EditText) findViewById(R.id.etLoginPassword);
-        inputName = (EditText) findViewById(R.id.etLoginName);
-        inputCarType = (EditText) findViewById(R.id.etLoginCarModel);
-        inputCarTypeContainer = (TextInputLayout) findViewById(R.id.carModelWrapper);
-        inputNameContainer = (TextInputLayout) findViewById(R.id.nameWrapper);
-        inputLicenseNoContainer = (TextInputLayout) findViewById(R.id.licenseNoWrapper);
-        loginButton = (Button) findViewById(R.id.bLogin);
-        toggleButton = (TextView) findViewById(R.id.tvRegister);
+        inputEmail = findViewById(R.id.etLoginEmail);
+        inputPassword = findViewById(R.id.etLoginPassword);
+        inputConfirmPassword = findViewById(R.id.etConfirmPassword);
+        inputName = findViewById(R.id.etLoginName);
+        inputCarType = findViewById(R.id.etLoginCarModel);
+        inputLicenseNo = findViewById(R.id.etLicenseNo);
+        inputConfirmPasswordContainer = findViewById(R.id.confirmPasswordWrapper);
+        inputCarTypeContainer = findViewById(R.id.carModelWrapper);
+        inputNameContainer = findViewById(R.id.nameWrapper);
+        inputLicenseNoContainer = findViewById(R.id.licenseNoWrapper);
+        loginButton = findViewById(R.id.bLogin);
+        toggleButton = findViewById(R.id.tvRegister);
         //logo = findViewById(R.id.login_logo);
         //textLogo = findViewById(R.id.login_text_logo);
-        progressBar = (ProgressBar) findViewById(R.id.pbLogin);
+        progressBar = findViewById(R.id.pbLogin);
 
+
+
+        network = new Network();
 
         toggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,11 +87,13 @@ public class RegisterLoginActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (isLogin) {
                     //login with email
-                    if (!inputEmail.getText().toString().isEmpty() && !inputPassword.getText().toString().isEmpty()) {
-                        mContext = this;
-                        mApiService = UtilsApi.getAPIService();
+                    if (!inputEmail.getText().toString().isEmpty() || !inputPassword.getText().toString().isEmpty()) {
+                        loading = ProgressDialog.show(RegisterLoginActivity.this, null, "Please wait", true, false);
 
-                        loading = ProgressDialog.show((Context) mContext, null, "Please wait", true, false);
+//                        mContext = this;
+//                        mApiService = UtilsApi.getAPIService();
+//
+//                        loading = ProgressDialog.show((Context) mContext, null, "Please wait", true, false);
                         requestLogin();
 //                        toggleProgressBar();
 //                        String email = inputEmail.getText().toString();
@@ -119,11 +109,22 @@ public class RegisterLoginActivity extends AppCompatActivity {
                     }
                 } else {
                     //register with email
-                    mContext = this;
-                    mApiService = UtilsApi.getAPIService();
+                    if (!inputEmail.getText().toString().isEmpty() ||
+                            !inputPassword.getText().toString().isEmpty() ||
+                            !inputConfirmPassword.getText().toString().isEmpty() ||
+                            !inputName.getText().toString().isEmpty() ||
+                            !inputCarType.getText().toString().isEmpty() ||
+                            !inputLicenseNo.getText().toString().isEmpty() ||
+                            inputPassword.getText().toString().equals(inputConfirmPassword.getText().toString())) {
+                        loading = ProgressDialog.show(RegisterLoginActivity.this, null, "Please wait", true, false);
+                        requestRegister();
+                    } else {
+                        Toast.makeText(RegisterLoginActivity.this,
+                                "Please check again",
+                                Toast.LENGTH_SHORT).show();
+                    }
 
-                    loading = ProgressDialog.show(RegisterLoginActivity.this, null, "Please wait", true, false);
-                    requestRegister();
+
 //                    try {
 //                        //GetReg();
 //                    }
@@ -155,86 +156,132 @@ public class RegisterLoginActivity extends AppCompatActivity {
 
     }
 
+
     private void requestLogin() {
-        mApiService.loginRequest(inputEmail.getText().toString(),
-                inputPassword.getText().toString()).enqueue(new Callback<ResponseBody>() {
+        String email = inputEmail.getText().toString();
+        String password = inputPassword.getText().toString();
+
+        final LoginRequestModel request = new LoginRequestModel(email, password);
+
+        network.Login(request, new Network.MyCallback<String>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()){
-                    loading.dismiss();
-                    try {
-                        JSONObject jsonRESULTS = new JSONObject(response.body().string());
-                        if (jsonRESULTS.getString("error").equals("false")){
-                            // Jika login berhasil maka data yang ada di response API
-                            // akan diparsing ke activity selanjutnya.
-                            Toast.makeText((Context) mContext, "LOGIN SUCCESSFUL", Toast.LENGTH_SHORT).show();
-                            //String nama = jsonRESULTS.getJSONObject("user").getString("nama");
-                            Intent intent = new Intent((Context) mContext, MainActivity.class);
-                            //intent.putExtra("result_nama", nama);
-                            startActivity(intent);
-                        } else {
-                            // Jika login gagal
-                            String error_message = jsonRESULTS.getString("error_msg");
-                            Toast.makeText((Context) mContext, error_message, Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    loading.dismiss();
-                }
+            public void onSuccess(String response) {
+                Toast.makeText(RegisterLoginActivity.this,
+                        response,
+                        Toast.LENGTH_SHORT).show();
+                loading.dismiss();
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("debug", "onFailure: ERROR > " + t.toString());
+            public void onError(String error) {
+                Toast.makeText(RegisterLoginActivity.this,
+                        error,
+                        Toast.LENGTH_SHORT).show();
                 loading.dismiss();
             }
         });
     }
 
-    private void requestRegister() {
-        name = inputName.getText().toString();
-        email = inputEmail.getText().toString();
-        car_type = inputCarType.getText().toString();
-        license_no = inputLicenseNo.getText().toString();
-        password = inputPassword.getText().toString();
+//        mApiService.loginRequest(inputEmail.getText().toString(),
+//                inputPassword.getText().toString()).enqueue(new Callback<ResponseBody>() {
+//            @Override
+//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                if (response.isSuccessful()){
+//                    loading.dismiss();
+//                    try {
+//                        JSONObject jsonRESULTS = new JSONObject(response.body().string());
+//                        if (jsonRESULTS.getString("error").equals("false")){
+//                            // Jika login berhasil maka data yang ada di response API
+//                            // akan diparsing ke activity selanjutnya.
+//                            Toast.makeText((Context) mContext, "LOGIN SUCCESSFUL", Toast.LENGTH_SHORT).show();
+//                            //String nama = jsonRESULTS.getJSONObject("user").getString("nama");
+//                            Intent intent = new Intent((Context) mContext, MainActivity.class);
+//                            //intent.putExtra("result_nama", nama);
+//                            startActivity(intent);
+//                        } else {
+//                            // Jika login gagal
+//                            String error_message = jsonRESULTS.getString("error_msg");
+//                            Toast.makeText((Context) mContext, error_message, Toast.LENGTH_SHORT).show();
+//                        }
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                } else {
+//                    loading.dismiss();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                Log.e("debug", "onFailure: ERROR > " + t.toString());
+//                loading.dismiss();
+//            }
+//        });
 
-        mApiService.registerRequest(name, email, car_type, license_no, password).enqueue(new Callback<ResponseBody>() {
+
+    private void requestRegister() {
+        String name = inputName.getText().toString();
+        String email = inputEmail.getText().toString();
+        String car_type = inputCarType.getText().toString();
+        String license_no = inputLicenseNo.getText().toString();
+        String password = inputPassword.getText().toString();
+
+        final RegisterRequestModel request = new RegisterRequestModel(name, email, password, car_type, license_no);
+
+        network.Register(request, new Network.MyCallback<String>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()){
-                    Log.i("debug", "onResponse: REGISTRATION SUCCESS");
-                    loading.dismiss();
-                    try {
-                        JSONObject jsonRESULTS = new JSONObject(response.body().string());
-                        if (jsonRESULTS.getString("error").equals("false")){
-                            Toast.makeText((Context) mContext, "REGISTRATION SUCCESS", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent((Context) mContext, MainActivity.class));
-                        } else {
-                            String error_message = jsonRESULTS.getString("error_msg");
-                            Toast.makeText((Context) mContext, error_message, Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Log.i("debug", "onResponse: FAILED");
-                    loading.dismiss();
-                }
+            public void onSuccess(String response) {
+                Toast.makeText(RegisterLoginActivity.this,
+                        response,
+                        Toast.LENGTH_SHORT).show();
+                loading.dismiss();
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onError(String error) {
+                Toast.makeText(RegisterLoginActivity.this,
+                        error,
+                        Toast.LENGTH_SHORT).show();
+                loading.dismiss();
 
-                Log.e("debug", "onFailure: ERROR > " + t.getMessage());
-                Toast.makeText((Context) mContext, "CONNECTION ERROR", Toast.LENGTH_SHORT).show();
             }
         });
+
+//        mApiService.registerRequest(name, email, car_type, license_no, password).enqueue(new Callback<ResponseBody>() {
+//            @Override
+//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                if (response.isSuccessful()){
+//                    Log.i("debug", "onResponse: REGISTRATION SUCCESS");
+//                    loading.dismiss();
+//                    try {
+//                        JSONObject jsonRESULTS = new JSONObject(response.body().string());
+//                        if (jsonRESULTS.getString("error").equals("false")){
+//                            Toast.makeText((Context) mContext, "REGISTRATION SUCCESS", Toast.LENGTH_SHORT).show();
+//                            startActivity(new Intent((Context) mContext, MainActivity.class));
+//                        } else {
+//                            String error_message = jsonRESULTS.getString("error_msg");
+//                            Toast.makeText((Context) mContext, error_message, Toast.LENGTH_SHORT).show();
+//                        }
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                } else {
+//                    Log.i("debug", "onResponse: FAILED");
+//                    loading.dismiss();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ResponseBody> call, Throwable t) {
+//
+//                Log.e("debug", "onFailure: ERROR > " + t.getMessage());
+//                Toast.makeText((Context) mContext, "CONNECTION ERROR", Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
 //    public void GetReg() throws UnsupportedEncodingException {
@@ -331,9 +378,12 @@ public class RegisterLoginActivity extends AppCompatActivity {
 //
 //    }
 
+
+
     private void toggleRegister() {
-        if (inputNameContainer.getVisibility() == View.GONE) {
+        if (inputConfirmPasswordContainer.getVisibility() == View.GONE) {
             //logo.setVisibility(View.GONE);
+            inputConfirmPasswordContainer.setVisibility(View.VISIBLE);
             inputNameContainer.setVisibility(View.VISIBLE);
             inputCarTypeContainer.setVisibility(View.VISIBLE);
             inputLicenseNoContainer.setVisibility(View.VISIBLE);
@@ -341,6 +391,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
             loginButton.setText("Register");
             isLogin = false;
         } else {
+            inputConfirmPasswordContainer.setVisibility(View.GONE);
             inputNameContainer.setVisibility(View.GONE);
             inputCarTypeContainer.setVisibility(View.GONE);
             inputLicenseNoContainer.setVisibility(View.GONE);
