@@ -1,6 +1,7 @@
 package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -38,6 +39,8 @@ public class RegisterLoginActivity extends AppCompatActivity {
 //    private TextView textLogo;
     private ProgressBar progressBar;
 
+    private Intent intentMain;
+
 //    private View.OnClickListener mContext;
 //    private BaseApiService mApiService;
     private ProgressDialog loading;
@@ -46,6 +49,8 @@ public class RegisterLoginActivity extends AppCompatActivity {
     //private String name, email, car_type, license_no, password = "";
 
     private Network network;
+
+    private String name, email, car_type, license_no, password, confirm_pass;
 
 
     @Override
@@ -85,70 +90,33 @@ public class RegisterLoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                intentMain = new Intent(view.getContext(), MainActivity.class);
+                getText();
                 if (isLogin) {
                     //login with email
-                    if (!inputEmail.getText().toString().isEmpty() || !inputPassword.getText().toString().isEmpty()) {
-                        loading = ProgressDialog.show(RegisterLoginActivity.this, null, "Please wait", true, false);
-
-//                        mContext = this;
-//                        mApiService = UtilsApi.getAPIService();
+                    loading = ProgressDialog.show(RegisterLoginActivity.this, null, "Please wait", true, false);
+                    requestLogin();
+//                    if (!inputEmail.getText().toString().isEmpty() || !inputPassword.getText().toString().isEmpty()) {
 //
-//                        loading = ProgressDialog.show((Context) mContext, null, "Please wait", true, false);
-                        requestLogin();
-//                        toggleProgressBar();
-//                        String email = inputEmail.getText().toString();
-//                        String password = inputPassword.getText().toString();
-//                        Toast.makeText(RegisterLoginActivity.this,
-//                                "Login successful",
-//                                Toast.LENGTH_SHORT).show();
-                    }
-                    else {
-                        Toast.makeText(RegisterLoginActivity.this,
-                                "Please check again",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    //register with email
-                    if (!inputEmail.getText().toString().isEmpty() ||
-                            !inputPassword.getText().toString().isEmpty() ||
-                            !inputConfirmPassword.getText().toString().isEmpty() ||
-                            !inputName.getText().toString().isEmpty() ||
-                            !inputCarType.getText().toString().isEmpty() ||
-                            !inputLicenseNo.getText().toString().isEmpty() ||
-                            inputPassword.getText().toString().equals(inputConfirmPassword.getText().toString())) {
-                        loading = ProgressDialog.show(RegisterLoginActivity.this, null, "Please wait", true, false);
-                        requestRegister();
-                    } else {
-                        Toast.makeText(RegisterLoginActivity.this,
-                                "Please check again",
-                                Toast.LENGTH_SHORT).show();
-                    }
-
-
-//                    try {
-//                        //GetReg();
-//                    }
-//                    catch (Exception ex) {
-//                        Toast.makeText(RegisterLoginActivity.this,
-//                                "URL Exception",
-//                                Toast.LENGTH_SHORT).show();
-//                    }
-
-//                    if (!inputEmail.getText().toString().isEmpty() && !inputPassword.getText().toString().isEmpty()) {
-//                        submitRegisterForm();
-////                        final String email = inputEmail.getText().toString();
+////                        toggleProgressBar();
+////                        String email = inputEmail.getText().toString();
 ////                        String password = inputPassword.getText().toString();
-////                        if (!inputName.getText().toString().isEmpty()) {
-////                            name = inputName.getText().toString();
-////                        }
-////                        if (!inputPhone.getText().toString().isEmpty()) {
-////                            phone = inputPhone.getText().toString();
-////                        }
-//                        //toggleProgressBar();
+////                        Toast.makeText(RegisterLoginActivity.this,
+////                                "Login successful",
+////                                Toast.LENGTH_SHORT).show();
+//                    }
+//                    else {
 //                        Toast.makeText(RegisterLoginActivity.this,
 //                                "Please check again",
 //                                Toast.LENGTH_SHORT).show();
 //                    }
+                }
+                else {
+                    //register with email
+                    loading = ProgressDialog.show(RegisterLoginActivity.this, null, "Please wait", true, false);
+                    requestRegister();
+
+
                 }
             }
 
@@ -158,28 +126,40 @@ public class RegisterLoginActivity extends AppCompatActivity {
 
 
     private void requestLogin() {
-        String email = inputEmail.getText().toString();
-        String password = inputPassword.getText().toString();
+//        String email = inputEmail.getText().toString();
+//        String password = inputPassword.getText().toString();
+        getText();
 
-        final LoginRequestModel request = new LoginRequestModel(email, password);
+        if(email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(RegisterLoginActivity.this,
+                    "Please check again",
+                    Toast.LENGTH_SHORT).show();
+            loading.dismiss();
+        }
 
-        network.Login(request, new Network.MyCallback<String>() {
-            @Override
-            public void onSuccess(String response) {
-                Toast.makeText(RegisterLoginActivity.this,
-                        response,
-                        Toast.LENGTH_SHORT).show();
-                loading.dismiss();
-            }
+        else {
+            final LoginRequestModel request = new LoginRequestModel(email, password);
 
-            @Override
-            public void onError(String error) {
-                Toast.makeText(RegisterLoginActivity.this,
-                        error,
-                        Toast.LENGTH_SHORT).show();
-                loading.dismiss();
-            }
-        });
+            network.Login(request, new Network.MyCallback<String>() {
+                @Override
+                public void onSuccess(String response) {
+                    Toast.makeText(RegisterLoginActivity.this,
+                            response,
+                            Toast.LENGTH_SHORT).show();
+                    loading.dismiss();
+                    startActivity(intentMain);
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(RegisterLoginActivity.this,
+                            error,
+                            Toast.LENGTH_SHORT).show();
+                    loading.dismiss();
+                }
+            });
+        }
+
     }
 
 //        mApiService.loginRequest(inputEmail.getText().toString(),
@@ -222,32 +202,63 @@ public class RegisterLoginActivity extends AppCompatActivity {
 
 
     private void requestRegister() {
-        String name = inputName.getText().toString();
-        String email = inputEmail.getText().toString();
-        String car_type = inputCarType.getText().toString();
-        String license_no = inputLicenseNo.getText().toString();
-        String password = inputPassword.getText().toString();
+//        String name = inputName.getText().toString();
+//        String email = inputEmail.getText().toString();
+//        String car_type = inputCarType.getText().toString();
+//        String license_no = inputLicenseNo.getText().toString();
+//        String password = inputPassword.getText().toString();
+//        String confirm_pass = inputConfirmPassword.getText().toString();
 
-        final RegisterRequestModel request = new RegisterRequestModel(name, email, password, car_type, license_no);
 
-        network.Register(request, new Network.MyCallback<String>() {
-            @Override
-            public void onSuccess(String response) {
-                Toast.makeText(RegisterLoginActivity.this,
-                        response,
-                        Toast.LENGTH_SHORT).show();
-                loading.dismiss();
-            }
 
-            @Override
-            public void onError(String error) {
-                Toast.makeText(RegisterLoginActivity.this,
-                        error,
-                        Toast.LENGTH_SHORT).show();
-                loading.dismiss();
+//        if (!name.isEmpty() || !email.isEmpty() || !car_type.isEmpty() || !license_no.isEmpty() || !password.isEmpty() ||
+//                !confirm_pass.isEmpty() || !password.equals(confirm_pass)) {
 
-            }
-        });
+        if (name.isEmpty() || password.isEmpty() || email.isEmpty() || car_type.isEmpty() || license_no.isEmpty() || confirm_pass.isEmpty()
+                || password.equals(confirm_pass)) {
+            Toast.makeText(RegisterLoginActivity.this,
+                    "Please check again",
+                    Toast.LENGTH_SHORT).show();
+            loading.dismiss();
+
+        } else {
+            final RegisterRequestModel request = new RegisterRequestModel(name, email, password, car_type, license_no);
+
+            network.Register(request, new Network.MyCallback<String>() {
+                @Override
+                public void onSuccess(String response) {
+                    Toast.makeText(RegisterLoginActivity.this,
+                            response,
+                            Toast.LENGTH_SHORT).show();
+                    loading.dismiss();
+                    startActivity(intentMain);
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(RegisterLoginActivity.this,
+                            error,
+                            Toast.LENGTH_SHORT).show();
+                    loading.dismiss();
+
+                }
+            });
+
+        }
+
+
+
+//        } else {
+//
+//            Toast.makeText(RegisterLoginActivity.this,
+//                    "Please check again",
+//                    Toast.LENGTH_SHORT).show();
+//            loading.dismiss();
+//
+//        }
+    }
+
+
 
 //        mApiService.registerRequest(name, email, car_type, license_no, password).enqueue(new Callback<ResponseBody>() {
 //            @Override
@@ -282,102 +293,15 @@ public class RegisterLoginActivity extends AppCompatActivity {
 //                Toast.makeText((Context) mContext, "CONNECTION ERROR", Toast.LENGTH_SHORT).show();
 //            }
 //        });
+
+    private void getText() {
+        name = inputName.getText().toString();
+        email = inputEmail.getText().toString();
+        car_type = inputCarType.getText().toString();
+        license_no = inputLicenseNo.getText().toString();
+        password = inputPassword.getText().toString();
+        confirm_pass = inputConfirmPassword.getText().toString();
     }
-
-//    public void GetReg() throws UnsupportedEncodingException {
-//
-//        //user defined values
-//        String email = inputEmail.getText().toString();
-//        String name = inputName.getText().toString();
-//        String password = inputPassword.getText().toString();
-//        String type = inputCarType.getText().toString();
-//        String no = inputLicenseNo.getText().toString();
-//
-//        //data variable for sent values to server
-//        String data = URLEncoder.encode("email", "UTF-8")
-//                + "=" + URLEncoder.encode(email, "UTF-8");
-//
-//        data += "&" + URLEncoder.encode("name", "UTF-8") + "="
-//                + URLEncoder.encode(name, "UTF-8");
-//
-//        data += "&" + URLEncoder.encode("pass", "UTF-8")
-//                + "=" + URLEncoder.encode(password, "UTF-8");
-//
-//        data += "&" + URLEncoder.encode("type", "UTF-8")
-//                + "=" + URLEncoder.encode(type, "UTF-8");
-//
-//        data += "&" + URLEncoder.encode("no", "UTF-8")
-//                + "=" + URLEncoder.encode(no, "UTF-8");
-//
-//        String text = "";
-//        BufferedReader reader = null;
-//
-//        //send data
-//        try {
-//            URL regURL = new URL("");
-//
-//            //send post data req
-//            URLConnection conn = regURL.openConnection();
-//            conn.setDoOutput(true);
-//            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-//            wr.write( data );
-//            wr.flush();
-//
-//            //get server response
-//            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//            StringBuilder sb = new StringBuilder();
-//            String line = null;
-//
-//            //read server response
-//            while((line = reader.readLine()) != null) {
-//                // Append server response in string
-//                sb.append(line + "\n");
-//            }
-//            text = sb.toString();
-//        }
-//
-//        catch (Exception ex) {
-//        }
-//
-//        finally {
-//            try {
-//                reader.close();
-//            }
-//            catch (Exception ex) {
-//
-//            }
-//
-//        }
-//    }
-
-//    @Override
-//    public void onItemSelected(AdapterView<?> arg0, View arg1, int long arg3) {
-//        String sp1 = String.valueOf(selectCarBrand.getSelectedItem());
-//        Toast.makeText(this, sp1, Toast.LENGTH_SHORT).show();
-//        if(sp1.contentEquals("Honda")) {
-//            ArrayAdapter<CharSequence> brandAdapter = ArrayAdapter.createFromResource(this, R.array.car_brands, simple_spinner_item);
-//            brandAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//            selectCarBrand.setAdapter(brandAdapter);
-//        }
-//    }
-
-//        public void addItemsOnModelSpinner() {
-//            List<String> list = new ArrayList<String>();
-//            list.add("list 1");
-//            list.add("list 2");
-//            list.add("list 3");
-//            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
-//                    android.R.layout.simple_spinner_item, list);
-//            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//            selectCarModel.setAdapter(dataAdapter);
-//
-//    }
-//
-//    public void addListenerOnSpinnerItemSelection() {
-//            selectCarBrand.setOnItemSelectedListener(new CustomOnItemSelectedListener());
-//
-//    }
-
 
 
     private void toggleRegister() {
@@ -411,41 +335,6 @@ public class RegisterLoginActivity extends AppCompatActivity {
         }
     }
 
-//    private void carModel() {
-//        List<String> honda = new ArrayList<String>();
-//        honda.add("Brio");
-//        honda.add("BR-V");
-//        honda.add("Civic");
-//        honda.add("Freed");
-//        honda.add("Jazz");
-//
-//        ArrayAdapter<String> hondaAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, honda);
-//        hondaAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        selectCarModel.setAdapter(hondaAdapter);
-//        selectCarModel.setOnItemSelectedListener(new MyOnItemSelectedListener());
-//
-//    }
-
-
-
-
-
-
-//    @Override
-//    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//        if (parent.getId() == R.id.sCarBrand) {
-//            ArrayAdapter<CharSequence> modelAdapter = ArrayAdapter.createFromResource(this, R.array.car_model_honda, android.R.layout.simple_spinner_item);
-//            if(selectCarBrand.getSelectedItem().toString().equals("Honda")) {
-//                selectCarModel.setAdapter(modelAdapter);
-//            }
-//            modelAdapter.clear();
-//        }
-//    }
-//
-//    @Override
-//    public void onNothingSelected(AdapterView<?> parent) {
-//
-//    }
 }
 
 
