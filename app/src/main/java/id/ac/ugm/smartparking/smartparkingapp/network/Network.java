@@ -20,14 +20,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.51.1.25:8000/api/";
+    public static final String BASE_URL_API = "http://10.72.16.128:8000/api/";
     private NetworkService service;
 
     public Network() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        HeaderInterceptor headerInterceptor = new HeaderInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.addInterceptor(interceptor);
+        builder.addInterceptor(interceptor)
+            .addInterceptor(headerInterceptor);
         OkHttpClient client = builder
                 .connectTimeout(90, TimeUnit.SECONDS)
                 .writeTimeout(90, TimeUnit.SECONDS)
@@ -38,7 +40,7 @@ public class Network {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL_API)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(client)
                 .build();
 

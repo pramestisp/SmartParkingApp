@@ -215,7 +215,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
 //                !confirm_pass.isEmpty() || !password.equals(confirm_pass)) {
 
         if (name.isEmpty() || password.isEmpty() || email.isEmpty() || car_type.isEmpty() || license_no.isEmpty() || confirm_pass.isEmpty()
-                || password.equals(confirm_pass)) {
+                || !password.equals(confirm_pass)) {
             Toast.makeText(RegisterLoginActivity.this,
                     "Please check again",
                     Toast.LENGTH_SHORT).show();
@@ -231,7 +231,6 @@ public class RegisterLoginActivity extends AppCompatActivity {
                             response,
                             Toast.LENGTH_SHORT).show();
                     loading.dismiss();
-                    startActivity(intentMain);
                 }
 
                 @Override

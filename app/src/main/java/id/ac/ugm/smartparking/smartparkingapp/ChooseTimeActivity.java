@@ -39,6 +39,8 @@ public class ChooseTimeActivity extends AppCompatActivity implements View.OnClic
 
     private Calendar c1, c2;
 
+    private int TIME_PICKER_INTERVAL = 30;
+
     long fromMillis, toMillis, diff, diffSec, diffMin;
 
     int min, hour;
@@ -71,43 +73,57 @@ public class ChooseTimeActivity extends AppCompatActivity implements View.OnClic
 //                fromMillis = c1.getTimeInMillis();
 
 
-                fromTimePickerDialog = new TimePickerDialog(ChooseTimeActivity.this, TimePickerDialog.THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                fromTimePickerDialog = new CustomTimePickerDialog(ChooseTimeActivity.this, TimePickerDialog.THEME_HOLO_LIGHT,
+                        new CustomTimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                Calendar cal = Calendar.getInstance();
+                                cal.set(
+                                        cal.get(Calendar.YEAR),
+                                        cal.get(Calendar.MONTH),
+                                        cal.get(Calendar.DAY_OF_MONTH),
+                                        hourOfDay,
+                                        minute
+                                );
+                                fromMillis = cal.getTimeInMillis();
 
-                        Calendar cal = Calendar.getInstance();
-                        cal.set(
-                                cal.get(Calendar.YEAR),
-                                cal.get(Calendar.MONTH),
-                                cal.get(Calendar.DAY_OF_MONTH),
-                                hourOfDay,
-                                minute
-                        );
-                        fromMillis = cal.getTimeInMillis();
+                                Date fromTime = cal.getTime();
 
-                        Date fromTime = cal.getTime();
+                                DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
+                                SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                                String df_string = format.format(fromTime);
 
-                        DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
-                        SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
-//                        String df_string = df.format(fromTime);
-                        String df_string = format.format(fromTime);
-//                        try {
-                            ////String fromTime = String.valueOf(hourOfDay) + ":" + String.valueOf(minute);
-                            ////String format = DateFormat.getDateInstance(DateFormat.SHORT).format(fromTime);
-                            //long fromTimeValue = format.parse(fromTime).getTime();
-                            //SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-                            //java.sql.Time fromTimeValue = new java.sql.Time(format.parse(fromTime).getTime());
-                            //etFromTime.setText(String.valueOf(df_string));
-                        etFromTime.setText(df_string);
-//                        } catch (ParseException e) {
-//                            etFromTime.setText(e.getMessage().toString());
-//                        }
-                        //Calendar c = Calendar.getInstance();
-                        //etFromTime.setText(String.format("%02d:%02d", hourOfDay, minute));
+                                etFromTime.setText(df_string);
+                            }
+                        }, hourFrom, minuteFrom, true);
+                    fromTimePickerDialog.show();
 
-                    }
-                }, hourFrom, minuteFrom, true);
-                fromTimePickerDialog.show();
+                        //TimePickerDialog(ChooseTimeActivity.this, TimePickerDialog.THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener()
+//                        {
+//                    @Override
+//                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+//
+//                        Calendar cal = Calendar.getInstance();
+//                        cal.set(
+//                                cal.get(Calendar.YEAR),
+//                                cal.get(Calendar.MONTH),
+//                                cal.get(Calendar.DAY_OF_MONTH),
+//                                hourOfDay,
+//                                minute
+//                        );
+//                        fromMillis = cal.getTimeInMillis();
+//
+//                        Date fromTime = cal.getTime();
+//
+//                        DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
+//                        SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+//                        String df_string = format.format(fromTime);
+//
+//                        etFromTime.setText(df_string);
+//
+//                    }
+//                }, hourFrom, minuteFrom, true);
+//                fromTimePickerDialog.show();
             }
         });
 
