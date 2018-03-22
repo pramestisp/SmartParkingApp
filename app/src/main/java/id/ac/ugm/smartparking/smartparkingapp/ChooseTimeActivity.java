@@ -28,12 +28,12 @@ public class ChooseTimeActivity extends AppCompatActivity implements View.OnClic
     private EditText etFromTime;
     private EditText etToTime;
 
+    private Button bGetTime;
+
     private TimePickerDialog fromTimePickerDialog;
     private TimePickerDialog toTimePickerDialog;
 
     private SimpleDateFormat fromTimeFormat;
-
-    private Button bGetTime;
 
     private TextView tvTime;
 
@@ -50,7 +50,7 @@ public class ChooseTimeActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_choose_time);
+        setContentView(R.layout.dialog_choose_time);
 
         getIntent();
 
@@ -73,7 +73,7 @@ public class ChooseTimeActivity extends AppCompatActivity implements View.OnClic
 //                fromMillis = c1.getTimeInMillis();
 
 
-                fromTimePickerDialog = new CustomTimePickerDialog(ChooseTimeActivity.this, TimePickerDialog.THEME_HOLO_LIGHT,
+                fromTimePickerDialog = new TimePickerDialog(ChooseTimeActivity.this, TimePickerDialog.THEME_HOLO_LIGHT,
                         new CustomTimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -97,6 +97,9 @@ public class ChooseTimeActivity extends AppCompatActivity implements View.OnClic
                             }
                         }, hourFrom, minuteFrom, true);
                     fromTimePickerDialog.show();
+
+            }
+        });
 
                         //TimePickerDialog(ChooseTimeActivity.this, TimePickerDialog.THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener()
 //                        {
@@ -124,8 +127,7 @@ public class ChooseTimeActivity extends AppCompatActivity implements View.OnClic
 //                    }
 //                }, hourFrom, minuteFrom, true);
 //                fromTimePickerDialog.show();
-            }
-        });
+
 
         etToTime.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,7 +166,8 @@ public class ChooseTimeActivity extends AppCompatActivity implements View.OnClic
                 toTimePickerDialog.show();
             }
         });
-        bGetTime = (Button) findViewById(R.id.bGetTime);
+
+        bGetTime = findViewById(R.id.bGetTime);
 
         bGetTime.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -182,11 +185,6 @@ public class ChooseTimeActivity extends AppCompatActivity implements View.OnClic
                 min = (int) (minremaining / 60);
                 int secondsRemaining = (int) (minremaining % (60));
 
-                //diffSec = diff / 1000;
-                //diffMin = diff / (60*1000);
-                //diffMin = TimeUnit.MILLISECONDS.toMinutes(fromMillis);
-
-                //diffMin = (diff / (1000 * 60)) % 60;
 
                 Log.e("tomillis", String.valueOf(toMillis));
                 Log.e("frommillis", String.valueOf(fromMillis));

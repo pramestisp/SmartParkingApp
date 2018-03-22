@@ -18,11 +18,14 @@ public class CustomTimePickerDialog extends TimePickerDialog {
     private final OnTimeSetListener mTimeSetListener;
     private TimePicker timePicker;
 
+
     public CustomTimePickerDialog(Context context, int themeHoloLight, OnTimeSetListener listener,
                                   int hourOfDay, int minute, boolean is24HourView) {
         super(context, TimePickerDialog.THEME_HOLO_LIGHT, null, hourOfDay, minute /
         TIME_PICKER_INTERVAL, is24HourView);
         mTimeSetListener = listener;
+        mTimePicker = new TimePicker(context);
+        timePicker = new TimePicker(context);
     }
 
     @Override
@@ -66,4 +69,5 @@ public class CustomTimePickerDialog extends TimePickerDialog {
             e.printStackTrace();
         }
     }
+
 }

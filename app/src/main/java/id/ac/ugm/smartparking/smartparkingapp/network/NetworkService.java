@@ -14,9 +14,11 @@ import retrofit2.http.POST;
 
 public interface NetworkService {
 
+    @Headers("Accept: application/json")
     @POST("auth/user/register")
     Call<ResponseBody> register(@Body RegisterRequestModel request);
 
+    @Headers("Accept: application/json")
     @POST("auth/login")
     Call<ResponseBody> login(@Body LoginRequestModel request);
 

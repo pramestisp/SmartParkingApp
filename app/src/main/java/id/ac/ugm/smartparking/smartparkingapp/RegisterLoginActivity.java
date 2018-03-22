@@ -1,6 +1,8 @@
 package id.ac.ugm.smartparking.smartparkingapp;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -227,9 +229,13 @@ public class RegisterLoginActivity extends AppCompatActivity {
             network.Register(request, new Network.MyCallback<String>() {
                 @Override
                 public void onSuccess(String response) {
-                    Toast.makeText(RegisterLoginActivity.this,
-                            response,
-                            Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(RegisterLoginActivity.this,
+//                            response,
+//                            Toast.LENGTH_SHORT).show();
+
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(RegisterLoginActivity.this);
+                    builder.setMessage("Register success! Please check your email to verify your account")
+                            .setPositiveButton("OK", null).show();
                     loading.dismiss();
                 }
 

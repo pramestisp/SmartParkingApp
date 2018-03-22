@@ -1,10 +1,14 @@
 package id.ac.ugm.smartparking.smartparkingapp;
 
-import android.content.Intent;
+import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
+import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,38 +18,243 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
+import org.w3c.dom.Text;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+
+    private View slot_1, slot_2, slot_3;
+
+    private EditText etFromTime;
+    private EditText etToTime;
+
+    private TextView tvTime,tvPrice;
+
+    private Button bCheck;
+
+    long fromMillis, toMillis, diff;
+
+    int hour, min, bookFee, feePerHour, feePer30Min, price;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0). setChecked(true);
         onNavigationItemSelected(navigationView.getMenu().getItem(0));
 
         getIntent();
 
+        slot_1 = findViewById(R.id.slot_1);
+        slot_2 = findViewById(R.id.slot_2);
+        slot_3 = findViewById(R.id.slot_3);
+
+        final boolean available = true;
+
+        if (available) {
+            slot_1.setBackgroundResource(R.color.green);
+            slot_2.setBackgroundResource(R.color.green);
+            slot_3.setBackgroundResource(R.color.green);
+        } else {
+            slot_1.setBackgroundResource(R.color.red);
+            slot_2.setBackgroundResource(R.color.red);
+            slot_3.setBackgroundResource(R.color.red);
+        }
+
         final Button bBook = findViewById(R.id.bBook);
 
         bBook.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intentSlot = new Intent(v.getContext(), ChooseSlotActivity.class);
-                startActivity(intentSlot);
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+                View mView = getLayoutInflater().inflate(R.layout.dialog_choose_time, null);
+
+                etFromTime = mView.findViewById(R.id.etFromTime);
+                etToTime = mView.findViewById(R.id.etToTime);
+
+                tvTime = mView.findViewById(R.id.tvTime);
+                tvPrice = mView.findViewById(R.id.tvPrice);
+
+                bCheck = mView.findViewById(R.id.bGetTime);
+
+                mBuilder.setView(mView);
+                AlertDialog dialog = mBuilder.create();
+                dialog.show();
+
+                bCheck.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        checkValue();
+                    }
+                });
+
+                etFromTime.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Calendar c1 = Calendar.getInstance();
+                        int hourFrom = c1.get(Calendar.HOUR_OF_DAY);
+                        int minuteFrom = c1.get(Calendar.MINUTE);
+                        final Date fromTime = c1.getTime();
+
+                        TimePickerDialog fromTimePickerDialog = new TimePickerDialog(MainActivity.this, TimePickerDialog.THEME_HOLO_LIGHT,
+                                new CustomTimePickerDialog.OnTimeSetListener() {
+                                    @Override
+                                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                        Calendar cal = Calendar.getInstance();
+                                        cal.set(
+                                                cal.get(Calendar.YEAR),
+                                                cal.get(Calendar.MONTH),
+                                                cal.get(Calendar.DAY_OF_MONTH),
+                                                hourOfDay,
+                                                minute
+                                        );
+                                        fromMillis = cal.getTimeInMillis();
+
+                                        Date fromTime = cal.getTime();
+
+                                        DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
+                                        SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                                        String df_string = format.format(fromTime);
+
+                                        etFromTime.setText(df_string);
+                                    }
+                                }, hourFrom, minuteFrom, true);
+                        fromTimePickerDialog.show();
+                    }
+                });
+
+                etToTime.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Calendar c2 = Calendar.getInstance();
+                        int hourTo = c2.get(Calendar.HOUR_OF_DAY);
+                        int minuteTo = c2.get(Calendar.MINUTE);
+
+//                toMillis = c2.getTimeInMillis();
+
+                        TimePickerDialog toTimePickerDialog = new TimePickerDialog(MainActivity.this, TimePickerDialog.THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                etToTime.setText(String.format("%02d:%02d", hourOfDay, minute));
+
+                                Calendar cal = Calendar.getInstance();
+                                cal.set(
+                                        cal.get(Calendar.YEAR),
+                                        cal.get(Calendar.MONTH),
+                                        cal.get(Calendar.DAY_OF_MONTH),
+                                        hourOfDay,
+                                        minute
+                                );
+                                toMillis = cal.getTimeInMillis();
+
+                                Date toTime = cal.getTime();
+
+                                DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
+                                SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+//                        String df_string = df.format(fromTime);
+                                String df_string = format.format(toTime);
+                                etToTime.setText(df_string);
+
+                            }
+                        }, hourTo, minuteTo, true);
+                        toTimePickerDialog.show();
+                    }
+                });
+//                Intent intentSlot = new Intent(v.getContext(), ChooseTimeActivity.class);
+//                startActivity(intentSlot);
             }
+
         });
+
+
+    }
+
+    private void checkValue() {
+        String fromTime = etFromTime.getText().toString();
+        String toTime = etToTime.getText().toString();
+
+        Log.e("tomillis", String.valueOf(toMillis));
+        Log.e("fromMillis", String.valueOf(fromMillis));
+
+        Log.e("et from time", fromTime);
+        Log.e("et to time", toTime);
+
+
+        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis < fromMillis) { //compare juga if time selected < current time
+
+            Toast.makeText(MainActivity.this,
+                    "Invalid time",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        else {
+            timeDiff();
+            tvTime.setText("From " + etFromTime.getText() + " To " + etToTime.getText() +
+                            "Time difference: " + hour + "hours" + min + "min");
+            priceCount();
+            tvPrice.setText("Price: Rp " + price + ",00");
+            ProgressDialog check = ProgressDialog.show(MainActivity.this, null, "Checking");
+
+            boolean success = false;
+            if(success == true) {
+                check.dismiss();
+            }
+            else {
+                return;
+            }
+        }
+    }
+
+    private void timeDiff() {
+        diff = toMillis - fromMillis;
+        long diffSec = TimeUnit.MILLISECONDS.toSeconds(diff);
+        hour = (int) (diffSec / (60*60));
+        int minremaining = (int) (diffSec % (60 * 60));
+        min = (int) (minremaining / 60);
+        int secondsRemaining = (int) (minremaining % (60));
+
+
+        Log.e("tomillis", String.valueOf(toMillis));
+        Log.e("frommillis", String.valueOf(fromMillis));
+        Log.e("difference", String.valueOf(diff));
+        Log.e("hour", String.valueOf(hour));
+        Log.e("min", String.valueOf(min));
+        Log.e("sec", String.valueOf(secondsRemaining));
+    }
+
+    private void priceCount() {
+        bookFee = 10000;
+        feePerHour = 3000;
+        feePer30Min = 2000;
+        price = bookFee + (hour * feePerHour);
+
+        if(min == 30) {
+            price += feePer30Min;
+        } else {
+            return;
+        }
 
 
     }
@@ -53,7 +262,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -89,7 +298,7 @@ public class MainActivity extends AppCompatActivity
             ft.commit();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

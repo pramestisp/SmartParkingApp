@@ -1,6 +1,14 @@
 package id.ac.ugm.smartparking.smartparkingapp;
 
+import android.annotation.SuppressLint;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -31,11 +39,38 @@ public class GridLayoutActivity extends AppCompatActivity {
     final View slot_18 = findViewById(R.id.slot_18);
     final View slot_19 = findViewById(R.id.slot_19);
 
+    private ColorStateList cGreen, cRed, cGray;
+
+    private boolean available;
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_grid);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        cGreen = getResources().getColorStateList(R.color.green);
+        cRed = getResources().getColorStateList(R.color.red);
+        cGray = getResources().getColorStateList(R.color.gray);
+
+        Drawable d = slot_1.getBackground();
+
+        available = true;
+
+        if(available) {
+//            slot_1.setBackgroundTintList(cGreen);
+            slot_1.setBackgroundColor(Color.GREEN);
+        }
+         else {
+            slot_1.setBackgroundColor(Color.RED);
+//            d = DrawableCompat.wrap(d);
+//            DrawableCompat.setTintList(d, cRed);
+//            slot_1.setBackground(d);
+        }
+
+
     }
 }
