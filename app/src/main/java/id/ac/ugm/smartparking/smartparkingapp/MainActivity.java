@@ -23,7 +23,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -47,6 +46,10 @@ public class MainActivity extends AppCompatActivity
     long fromMillis, toMillis, diff;
 
     int hour, min, bookFee, feePerHour, feePer30Min, price;
+
+    String df_string_from, df_string_to;
+
+    AlertDialog timeDialog, confirmDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,8 +103,8 @@ public class MainActivity extends AppCompatActivity
                 bCheck = mView.findViewById(R.id.bGetTime);
 
                 mBuilder.setView(mView);
-                AlertDialog dialog = mBuilder.create();
-                dialog.show();
+                timeDialog = mBuilder.create();
+                timeDialog.show();
 
                 bCheck.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -136,9 +139,9 @@ public class MainActivity extends AppCompatActivity
 
                                         DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
                                         SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                        String df_string = format.format(fromTime);
+                                        df_string_from = format.format(fromTime);
 
-                                        etFromTime.setText(df_string);
+                                        etFromTime.setText(df_string_from);
                                     }
                                 }, hourFrom, minuteFrom, true);
                         fromTimePickerDialog.show();
@@ -174,8 +177,8 @@ public class MainActivity extends AppCompatActivity
                                 DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
                                 SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
 //                        String df_string = df.format(fromTime);
-                                String df_string = format.format(toTime);
-                                etToTime.setText(df_string);
+                                df_string_to = format.format(toTime);
+                                etToTime.setText(df_string_to);
 
                             }
                         }, hourTo, minuteTo, true);
@@ -195,6 +198,8 @@ public class MainActivity extends AppCompatActivity
         String fromTime = etFromTime.getText().toString();
         String toTime = etToTime.getText().toString();
 
+        final boolean success;
+
         Log.e("tomillis", String.valueOf(toMillis));
         Log.e("fromMillis", String.valueOf(fromMillis));
 
@@ -211,19 +216,69 @@ public class MainActivity extends AppCompatActivity
 
         else {
             timeDiff();
-            tvTime.setText("From " + etFromTime.getText() + " To " + etToTime.getText() +
-                            "Time difference: " + hour + "hours" + min + "min");
-            priceCount();
-            tvPrice.setText("Price: Rp " + price + ",00");
-            ProgressDialog check = ProgressDialog.show(MainActivity.this, null, "Checking");
+//            tvTime.setText("From " + etFromTime.getText() + " To " + etToTime.getText() +
+//                            "Time difference: " + hour + "hours" + min + "min");
+//            priceCount();
+//            tvPrice.setText("Price: Rp " + price + ",00");
+//            ProgressDialog check = ProgressDialog.show(MainActivity.this, null, "Checking");
+//
+//            success = true;
+//
+//            if(success == true) {
+//                check.dismiss();
+                final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                View mView = getLayoutInflater().inflate(R.layout.dialog_confirm, null);
 
-            boolean success = false;
-            if(success == true) {
-                check.dismiss();
-            }
-            else {
-                return;
-            }
+                builder.setView(mView);
+                confirmDialog = builder.create();
+                confirmDialog.show();
+
+                TextView tvSlotNo = mView.findViewById(R.id.tvSlotNo);
+                TextView tvFromTime = mView.findViewById(R.id.tvFromTime);
+                TextView tvToTime = mView.findViewById(R.id.tvToTime);
+                TextView tvPrice = mView.findViewById(R.id.tvPrice);
+
+                Button bViewSlot = mView.findViewById(R.id.bViewSlot);
+                Button bConfirm = mView.findViewById(R.id.bConfirm);
+                Button bCancel = mView.findViewById(R.id.bCancel);
+
+                //ambil value dari dialog sblmnya utk arrival & leaving time
+
+                tvFromTime.setText(df_string_from);
+                tvToTime.setText(df_string_to);
+
+                priceCount();
+                tvPrice.setText("Rp " + price + ",00");
+
+                bViewSlot.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //ke GridLayoutActivity, tunjukkan slot sesuai no
+                    }
+                });
+
+                bConfirm.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //pindah activity, QR code dan time remaining
+                    }
+                });
+
+                bCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        confirmDialog.dismiss();
+                        timeDialog.dismiss();
+                    }
+                });
+
+
+//            }
+//            else {
+//                Toast.makeText(MainActivity.this,
+//                        "There's no available slot",
+//                        Toast.LENGTH_SHORT).show();
+//            }
         }
     }
 
