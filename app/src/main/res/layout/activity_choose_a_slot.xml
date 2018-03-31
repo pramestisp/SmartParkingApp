@@ -12,23 +12,6 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_alignParentBottom="true">
-
-        <Button
-            android:id="@+id/bChoose"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Choose"
-            android:background="#F57C00"
-            android:textColor="#FFFF"
-            android:visibility="gone"/>
-
-    </LinearLayout>
 
 
 </RelativeLayout>

@@ -10,7 +10,7 @@ import android.widget.Button;
  * Created by Shindy on 06-Nov-17.
  */
 
-public class ChooseSlotActivity extends AppCompatActivity {
+public class ViewSlotActivity extends AppCompatActivity {
 
     final View slot_3 = findViewById(R.id.slot_3);
     final View slot_4 = findViewById(R.id.slot_4);
@@ -22,7 +22,7 @@ public class ChooseSlotActivity extends AppCompatActivity {
     final View slot_15 = findViewById(R.id.slot_15);
     final View slot_16 = findViewById(R.id.slot_16);
 
-    final Button bChoose = findViewById(R.id.bChoose);
+    //final Button bChoose = findViewById(R.id.bChoose);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,16 +31,16 @@ public class ChooseSlotActivity extends AppCompatActivity {
 
         getIntent();
 
-        bChoose.setVisibility(View.INVISIBLE);
+        //bChoose.setVisibility(View.INVISIBLE);
 
 
-
-        bChoose.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intentTime = new Intent(v.getContext(), ChooseTimeActivity.class);
-                startActivity(intentTime);
-            }
-        });
+//
+//        bChoose.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                Intent intentTime = new Intent(v.getContext(), ChooseTimeActivity.class);
+//                startActivity(intentTime);
+//            }
+//        });
 
         // Get the Intent that started this activity and extract the string
         //Intent intentSlot = getIntent();

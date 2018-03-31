@@ -1,4 +1,4 @@
-package id.ac.ugm.smartparking.smartparkingapp.apihelper;
+package id.ac.ugm.smartparking.smartparkingapp.model;
 
 import com.google.gson.annotations.SerializedName;
 

@@ -2,7 +2,6 @@ package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -15,8 +14,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import id.ac.ugm.smartparking.smartparkingapp.apihelper.LoginRequestModel;
-import id.ac.ugm.smartparking.smartparkingapp.apihelper.RegisterRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 
 

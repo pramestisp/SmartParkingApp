@@ -49,8 +49,10 @@ public class GridLayoutActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_grid);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        getIntent();
 
         cGreen = getResources().getColorStateList(R.color.green);
         cRed = getResources().getColorStateList(R.color.red);

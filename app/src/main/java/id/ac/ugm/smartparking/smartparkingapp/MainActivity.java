@@ -2,6 +2,7 @@ package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -207,7 +208,7 @@ public class MainActivity extends AppCompatActivity
         Log.e("et to time", toTime);
 
 
-        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis < fromMillis) { //compare juga if time selected < current time
+        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis < fromMillis) { //compare juga if time selected =< current time
 
             Toast.makeText(MainActivity.this,
                     "Invalid time",
@@ -254,6 +255,9 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
                         //ke GridLayoutActivity, tunjukkan slot sesuai no
+                        Intent intentView = new Intent(v.getContext(), GridLayoutActivity.class);
+                        startActivity(intentView);
+
                     }
                 });
 

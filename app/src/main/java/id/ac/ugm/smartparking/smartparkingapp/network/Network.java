@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 
 import java.util.concurrent.TimeUnit;
 
-import id.ac.ugm.smartparking.smartparkingapp.apihelper.LoginRequestModel;
-import id.ac.ugm.smartparking.smartparkingapp.apihelper.RegisterRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
