@@ -20,11 +20,14 @@
         android:padding="10dp"
         android:textAlignment="center"
         android:text="A21"/>
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="view slot"
-        android:id="@+id/bViewSlot"/>
+        android:id="@+id/bViewSlot"
+        android:background="#F57C00"
+        android:textColor="#FFFF"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -93,18 +96,20 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+        <!--TODO: ubah warna button, entaran aja tapi di akhir-->
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="cancel"
-            android:id="@+id/bCancel"/>
+            android:id="@+id/bCancel"
+/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="confirm"
-            android:id="@+id/bConfirm"/>
+            android:id="@+id/bConfirm" />
     </LinearLayout>
     
 

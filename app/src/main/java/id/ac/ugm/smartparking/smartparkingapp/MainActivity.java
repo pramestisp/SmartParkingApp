@@ -32,6 +32,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
+import id.ac.ugm.smartparking.smartparkingapp.network.Network;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
@@ -43,6 +46,8 @@ public class MainActivity extends AppCompatActivity
     private TextView tvTime,tvPrice;
 
     private Button bCheck;
+
+    private Network network;
 
     long fromMillis, toMillis, diff;
 
@@ -71,6 +76,8 @@ public class MainActivity extends AppCompatActivity
         onNavigationItemSelected(navigationView.getMenu().getItem(0));
 
         getIntent();
+
+        network = new Network();
 
         slot_1 = findViewById(R.id.slot_1);
         slot_2 = findViewById(R.id.slot_2);
@@ -122,7 +129,7 @@ public class MainActivity extends AppCompatActivity
                         int minuteFrom = c1.get(Calendar.MINUTE);
                         final Date fromTime = c1.getTime();
 
-                        TimePickerDialog fromTimePickerDialog = new TimePickerDialog(MainActivity.this, TimePickerDialog.THEME_HOLO_LIGHT,
+                        CustomTimePickerDialog fromTimePickerDialog = new CustomTimePickerDialog(MainActivity.this,
                                 new CustomTimePickerDialog.OnTimeSetListener() {
                                     @Override
                                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -156,13 +163,10 @@ public class MainActivity extends AppCompatActivity
                         int hourTo = c2.get(Calendar.HOUR_OF_DAY);
                         int minuteTo = c2.get(Calendar.MINUTE);
 
-//                toMillis = c2.getTimeInMillis();
 
-                        TimePickerDialog toTimePickerDialog = new TimePickerDialog(MainActivity.this, TimePickerDialog.THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener() {
+                        CustomTimePickerDialog toTimePickerDialog = new CustomTimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                etToTime.setText(String.format("%02d:%02d", hourOfDay, minute));
-
                                 Calendar cal = Calendar.getInstance();
                                 cal.set(
                                         cal.get(Calendar.YEAR),
@@ -177,7 +181,6 @@ public class MainActivity extends AppCompatActivity
 
                                 DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
                                 SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
-//                        String df_string = df.format(fromTime);
                                 df_string_to = format.format(toTime);
                                 etToTime.setText(df_string_to);
 
@@ -193,6 +196,62 @@ public class MainActivity extends AppCompatActivity
         });
 
 
+    }
+
+    private void confirmDialog(String slotName) {
+        timeDiff();
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        View mView = getLayoutInflater().inflate(R.layout.dialog_confirm, null);
+
+        builder.setView(mView);
+        confirmDialog = builder.create();
+        confirmDialog.show();
+
+        TextView tvSlotNo = mView.findViewById(R.id.tvSlotNo);
+        TextView tvFromTime = mView.findViewById(R.id.tvFromTime);
+        TextView tvToTime = mView.findViewById(R.id.tvToTime);
+        TextView tvPrice = mView.findViewById(R.id.tvPrice);
+
+        Button bViewSlot = mView.findViewById(R.id.bViewSlot);
+        Button bConfirm = mView.findViewById(R.id.bConfirm);
+        Button bCancel = mView.findViewById(R.id.bCancel);
+
+
+        tvFromTime.setText(df_string_from);
+        tvToTime.setText(df_string_to);
+        tvSlotNo.setText(slotName);
+
+        priceCount();
+        tvPrice.setText("Rp " + price + ",00");
+
+        bViewSlot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //ke GridLayoutActivity, tunjukkan slot sesuai no
+                        Intent intentView = new Intent(v.getContext(), GridLayoutActivity.class);
+                        startActivity(intentView);
+
+            }
+        });
+
+        bConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //pindah activity, QR code dan time remaining
+                Intent intent = new Intent(v.getContext(), TimeRemainingActivity.class);
+                startActivity(intent);
+
+            }
+        });
+
+        bCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                confirmDialog.dismiss();
+                timeDialog.dismiss();
+            }
+        });
     }
 
     private void checkValue() {
@@ -216,73 +275,23 @@ public class MainActivity extends AppCompatActivity
         }
 
         else {
-            timeDiff();
-//            tvTime.setText("From " + etFromTime.getText() + " To " + etToTime.getText() +
-//                            "Time difference: " + hour + "hours" + min + "min");
-//            priceCount();
-//            tvPrice.setText("Price: Rp " + price + ",00");
-//            ProgressDialog check = ProgressDialog.show(MainActivity.this, null, "Checking");
-//
-//            success = true;
-//
-//            if(success == true) {
-//                check.dismiss();
-                final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                View mView = getLayoutInflater().inflate(R.layout.dialog_confirm, null);
+            String params = etFromTime.getText().toString() + "-" + etToTime.getText().toString();
+            final ProgressDialog loading = ProgressDialog.show(MainActivity.this, null, "Checking", true, false);
+            network.getSlot(params, new Network.MyCallback<CheckSlotResponse>() {
+                @Override
+                public void onSuccess(CheckSlotResponse response) {
+                    loading.dismiss();
+                    confirmDialog(response.data.get(0).getSlotName());
+                }
 
-                builder.setView(mView);
-                confirmDialog = builder.create();
-                confirmDialog.show();
-
-                TextView tvSlotNo = mView.findViewById(R.id.tvSlotNo);
-                TextView tvFromTime = mView.findViewById(R.id.tvFromTime);
-                TextView tvToTime = mView.findViewById(R.id.tvToTime);
-                TextView tvPrice = mView.findViewById(R.id.tvPrice);
-
-                Button bViewSlot = mView.findViewById(R.id.bViewSlot);
-                Button bConfirm = mView.findViewById(R.id.bConfirm);
-                Button bCancel = mView.findViewById(R.id.bCancel);
-
-                //ambil value dari dialog sblmnya utk arrival & leaving time
-
-                tvFromTime.setText(df_string_from);
-                tvToTime.setText(df_string_to);
-
-                priceCount();
-                tvPrice.setText("Rp " + price + ",00");
-
-                bViewSlot.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //ke GridLayoutActivity, tunjukkan slot sesuai no
-                        Intent intentView = new Intent(v.getContext(), GridLayoutActivity.class);
-                        startActivity(intentView);
-
-                    }
-                });
-
-                bConfirm.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //pindah activity, QR code dan time remaining
-                    }
-                });
-
-                bCancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        confirmDialog.dismiss();
-                        timeDialog.dismiss();
-                    }
-                });
-
-
-//            }
-//            else {
-//                Toast.makeText(MainActivity.this,
-//                        "There's no available slot",
-//                        Toast.LENGTH_SHORT).show();
-//            }
+                @Override
+                public void onError(String error) {
+                    loading.dismiss();
+                    Toast.makeText(MainActivity.this,
+                            error,
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import java.util.concurrent.TimeUnit;
 
+import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import okhttp3.OkHttpClient;
@@ -20,7 +21,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.72.42.229:8000/api/";
+    public static final String BASE_URL_API = "http://192.168.2.25:8000/api/";
     private NetworkService service;
 
     public Network() {
@@ -96,6 +97,27 @@ public class Network {
             }
         });
     }
+
+    public void getSlot(final String hour, final MyCallback<CheckSlotResponse> callback) {
+        service.getSlot(hour).enqueue(new Callback<CheckSlotResponse>() {
+            @Override
+            public void onResponse(Call<CheckSlotResponse> call, Response<CheckSlotResponse> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Something wrong");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CheckSlotResponse> call, Throwable t) {
+                t.printStackTrace();
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
+
+
 
 
 }
