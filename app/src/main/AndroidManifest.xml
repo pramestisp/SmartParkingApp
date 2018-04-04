@@ -23,11 +23,10 @@
             <!--android:label="@string/title_activity_main"-->
             <!--android:theme="@style/AppTheme" />-->
         <activity android:name=".TimeRemainingActivity"/>
-        <activity android:name=".GridLayoutActivity"/>
-        <!-- <activity android:name=".MainActivity"/> -->
+        <activity android:name=".ViewSlotActivity"/>
          <!--<activity android:name=".ChooseTimeActivity" />-->
 
-        <!--<activity android:name=".test"></activity>-->
+        <!--<activity android:namstagingtest"></activity>-->
     </application>
 
 </manifest>

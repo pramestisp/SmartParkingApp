@@ -12,15 +12,6 @@ import android.widget.Button;
 
 public class ViewSlotActivity extends AppCompatActivity {
 
-    final View slot_3 = findViewById(R.id.slot_3);
-    final View slot_4 = findViewById(R.id.slot_4);
-    final View slot_5 = findViewById(R.id.slot_5);
-    final View slot_8 = findViewById(R.id.slot_8);
-    final View slot_9 = findViewById(R.id.slot_9);
-    final View slot_10 = findViewById(R.id.slot_10);
-    final View slot_14 = findViewById(R.id.slot_14);
-    final View slot_15 = findViewById(R.id.slot_15);
-    final View slot_16 = findViewById(R.id.slot_16);
 
     //final Button bChoose = findViewById(R.id.bChoose);
 
@@ -30,6 +21,16 @@ public class ViewSlotActivity extends AppCompatActivity {
         setContentView(R.layout.activity_choose_a_slot);
 
         getIntent();
+        //TODO: make the selected slot green and blink
+        final View slot_3 = findViewById(R.id.slot_3);
+        final View slot_4 = findViewById(R.id.slot_4);
+        final View slot_5 = findViewById(R.id.slot_5);
+        final View slot_8 = findViewById(R.id.slot_8);
+        final View slot_9 = findViewById(R.id.slot_9);
+        final View slot_10 = findViewById(R.id.slot_10);
+        final View slot_14 = findViewById(R.id.slot_14);
+        final View slot_15 = findViewById(R.id.slot_15);
+        final View slot_16 = findViewById(R.id.slot_16);
 
         //bChoose.setVisibility(View.INVISIBLE);
 

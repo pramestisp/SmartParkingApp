@@ -21,7 +21,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://192.168.2.25:8000/api/";
+    public static final String BASE_URL_API = "http://10.72.27.253:8000/api/";
     private NetworkService service;
 
     public Network() {

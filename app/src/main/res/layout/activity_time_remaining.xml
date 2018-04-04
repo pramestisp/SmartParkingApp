@@ -13,10 +13,12 @@
         android:textAlignment="center"
         android:textSize="22sp"/>
 
-    <TextClock
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tcTime"/>
+        android:textAlignment="center"
+        android:textSize="56sp"
+        android:id="@+id/tvTime"/>
 
     <TextView
         android:layout_width="match_parent"

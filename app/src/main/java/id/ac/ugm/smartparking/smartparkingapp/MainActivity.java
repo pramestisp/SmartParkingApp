@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity
 
     private Network network;
 
-    long fromMillis, toMillis, diff;
+    public static long fromMillis, toMillis, diff;
 
     int hour, min, bookFee, feePerHour, feePer30Min, price;
 
@@ -189,8 +189,6 @@ public class MainActivity extends AppCompatActivity
                         toTimePickerDialog.show();
                     }
                 });
-//                Intent intentSlot = new Intent(v.getContext(), ChooseTimeActivity.class);
-//                startActivity(intentSlot);
             }
 
         });
@@ -228,9 +226,8 @@ public class MainActivity extends AppCompatActivity
         bViewSlot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //ke GridLayoutActivity, tunjukkan slot sesuai no
-                        Intent intentView = new Intent(v.getContext(), GridLayoutActivity.class);
-                        startActivity(intentView);
+                Intent intentView = new Intent(v.getContext(), ViewSlotActivity.class);
+                startActivity(intentView);
 
             }
         });
@@ -238,7 +235,6 @@ public class MainActivity extends AppCompatActivity
         bConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //pindah activity, QR code dan time remaining
                 Intent intent = new Intent(v.getContext(), TimeRemainingActivity.class);
                 startActivity(intent);
 
@@ -258,16 +254,16 @@ public class MainActivity extends AppCompatActivity
         String fromTime = etFromTime.getText().toString();
         String toTime = etToTime.getText().toString();
 
-        final boolean success;
-
         Log.e("tomillis", String.valueOf(toMillis));
         Log.e("fromMillis", String.valueOf(fromMillis));
 
         Log.e("et from time", fromTime);
         Log.e("et to time", toTime);
 
+        //timeDiff();
 
-        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis < fromMillis) { //compare juga if time selected =< current time
+
+        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis < fromMillis) {
 
             Toast.makeText(MainActivity.this,
                     "Invalid time",
@@ -327,6 +323,13 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    public long getFromMillis() {
+        return fromMillis;
+    }
+
+    public void setFromMillis(long fromMillis) {
+        this.fromMillis = fromMillis;
+    }
 
     @Override
     public void onBackPressed() {
