@@ -33,6 +33,8 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
+import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 
 public class MainActivity extends AppCompatActivity
@@ -51,11 +53,15 @@ public class MainActivity extends AppCompatActivity
 
     public static long fromMillis, toMillis, diff;
 
-    int hour, min, bookFee, feePerHour, feePer30Min, price;
+    float price;
+
+    int hour, min, bookFee, feePerHour, feePer30Min, idSlot;
 
     String df_string_from, df_string_to;
 
     AlertDialog timeDialog, confirmDialog;
+
+    ProgressDialog loading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,12 +203,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void confirmDialog(String slotName) {
-        timeDiff();
+        //TODO: POST data reservasi
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         View mView = getLayoutInflater().inflate(R.layout.dialog_confirm, null);
 
         builder.setView(mView);
+        builder.setCancelable(false);
         confirmDialog = builder.create();
         confirmDialog.show();
 
@@ -235,8 +242,30 @@ public class MainActivity extends AppCompatActivity
         bConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), TimeRemainingActivity.class);
-                startActivity(intent);
+                final ReservationRequestModel request = new ReservationRequestModel(idSlot, df_string_from, df_string_to, price);
+                loading.show();
+
+                final Intent intent = new Intent(v.getContext(), TimeRemainingActivity.class);
+
+                network.Reservation(request, new Network.MyCallback<String>() {
+                    @Override
+                    public void onSuccess(String response) {
+                        loading.dismiss();
+                        Toast.makeText(MainActivity.this,
+                                response,
+                                Toast.LENGTH_SHORT).show();
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        loading.dismiss();
+                        Toast.makeText(MainActivity.this,
+                                error,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
 
             }
         });
@@ -260,8 +289,6 @@ public class MainActivity extends AppCompatActivity
         Log.e("et from time", fromTime);
         Log.e("et to time", toTime);
 
-        //timeDiff();
-
 
         if (fromTime.isEmpty() || toTime.isEmpty() || toMillis < fromMillis) {
 
@@ -272,7 +299,7 @@ public class MainActivity extends AppCompatActivity
 
         else {
             String params = etFromTime.getText().toString() + "-" + etToTime.getText().toString();
-            final ProgressDialog loading = ProgressDialog.show(MainActivity.this, null, "Checking", true, false);
+            loading = ProgressDialog.show(MainActivity.this, null, "Checking", true, false);
             network.getSlot(params, new Network.MyCallback<CheckSlotResponse>() {
                 @Override
                 public void onSuccess(CheckSlotResponse response) {

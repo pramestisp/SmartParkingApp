@@ -4,6 +4,7 @@ import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckTimeRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -28,8 +29,12 @@ public interface NetworkService {
     @POST("auth/login")
     Call<ResponseBody> login(@Body LoginRequestModel request);
 
+    //TODO: GET token biar bisa reservasi
+
     @GET("carparkslot/{hour}")
     Call<CheckSlotResponse> getSlot(@Path("hour") String hour);
 
-
+    @Headers("Accept: application/json")
+    @POST("addreservation")
+    Call<ResponseBody> reservation(@Body ReservationRequestModel request);
 }

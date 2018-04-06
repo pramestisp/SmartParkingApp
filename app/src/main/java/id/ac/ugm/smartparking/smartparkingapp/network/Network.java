@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -21,7 +22,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.72.27.253:8000/api/";
+    public static final String BASE_URL_API = "http://10.72.5.75:8000/api/";
     private NetworkService service;
 
     public Network() {
@@ -105,7 +106,7 @@ public class Network {
                 if (response.isSuccessful()) {
                     callback.onSuccess(response.body());
                 } else {
-                    callback.onError("Something wrong");
+                    callback.onError("Something is wrong");
                 }
             }
 
@@ -117,7 +118,25 @@ public class Network {
         });
     }
 
+    public void Reservation(final ReservationRequestModel request, final MyCallback<String> callback) {
+        service.reservation(request).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.isSuccessful()) {
+                    callback.onSuccess("Reservation success");
+                }
+                else {
+                    callback.onError("Reservation failed");
+                }
+            }
 
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
 
 
 }
