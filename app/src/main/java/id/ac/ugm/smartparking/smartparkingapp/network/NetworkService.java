@@ -1,16 +1,18 @@
 package id.ac.ugm.smartparking.smartparkingapp.network;
 
+import java.sql.Ref;
+
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
-import id.ac.ugm.smartparking.smartparkingapp.model.CheckTimeRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -27,9 +29,7 @@ public interface NetworkService {
 
     @Headers("Accept: application/json")
     @POST("auth/login")
-    Call<ResponseBody> login(@Body LoginRequestModel request);
-
-    //TODO: GET token biar bisa reservasi
+    Call<LoginResponse> login(@Body LoginRequestModel request);
 
     @GET("carparkslot/{hour}")
     Call<CheckSlotResponse> getSlot(@Path("hour") String hour);
@@ -37,4 +37,6 @@ public interface NetworkService {
     @Headers("Accept: application/json")
     @POST("addreservation")
     Call<ResponseBody> reservation(@Body ReservationRequestModel request);
+
+    //TODO: GET slot status
 }

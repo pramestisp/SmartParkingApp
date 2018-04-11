@@ -12,9 +12,6 @@ import android.widget.Button;
 
 public class ViewSlotActivity extends AppCompatActivity {
 
-
-    //final Button bChoose = findViewById(R.id.bChoose);
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,19 +29,6 @@ public class ViewSlotActivity extends AppCompatActivity {
         final View slot_15 = findViewById(R.id.slot_15);
         final View slot_16 = findViewById(R.id.slot_16);
 
-        //bChoose.setVisibility(View.INVISIBLE);
-
-
-//
-//        bChoose.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                Intent intentTime = new Intent(v.getContext(), ChooseTimeActivity.class);
-//                startActivity(intentTime);
-//            }
-//        });
-
-        // Get the Intent that started this activity and extract the string
-        //Intent intentSlot = getIntent();
 
     }
 

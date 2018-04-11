@@ -3,6 +3,7 @@
     package="id.ac.ugm.smartparking.smartparkingapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -22,11 +23,11 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme" />
-        <activity android:name=".TimeRemainingActivity"/>
-        <activity android:name=".ViewSlotActivity"/>
-         <!--<activity android:name=".ChooseTimeActivity" />-->
+        <activity android:name=".TimeRemainingActivity" />
+        <activity android:name=".ViewSlotActivity" />
+        <!-- <activity android:name=".ChooseTimeActivity" /> -->
 
-        <!--<activity android:namstagingtest"></activity>-->
+        <activity android:name=".testResult"/>
     </application>
 
 </manifest>

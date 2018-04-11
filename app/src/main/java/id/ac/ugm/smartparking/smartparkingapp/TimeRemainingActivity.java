@@ -1,10 +1,15 @@
 package id.ac.ugm.smartparking.smartparkingapp;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.PersistableBundle;
+import android.os.Vibrator;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -70,6 +75,11 @@ public class TimeRemainingActivity extends AppCompatActivity {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(TimeRemainingActivity.this);
                     builder.setMessage("You got 15 minutes left")
                             .setPositiveButton("OK", null).show();
+
+                    Vibrator mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    mVibrator.vibrate(300);
+
+                    showNotif();
                 }
             }
 
@@ -138,14 +148,24 @@ public class TimeRemainingActivity extends AppCompatActivity {
         int minremaining = (int) (diffSec % (60 * 60));
         int min = (int) (minremaining / 60);
         int sec = (int) (minremaining % (60));
-//        int min = (int) (timeLeft / 1000) / 60;
-//        int sec = (int) (timeLeft / 1000) % 60;
-//        int hour = min / 60;
 
         String timeLeftFormatted = String.format(Locale.getDefault(),
                 "%02d:%02d:%02d", hour, min, sec);
 
         tvTimeCountdown.setText(timeLeftFormatted);
+    }
+
+    private void showNotif() {
+
+        NotificationManager notif = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                        .setContentTitle("Time's up!")
+                        .setContentText("Your time is up").build();
+
+        mBuilder.flags |= Notification.FLAG_AUTO_CANCEL;
+        notif.notify(0, mBuilder);
     }
 }
 

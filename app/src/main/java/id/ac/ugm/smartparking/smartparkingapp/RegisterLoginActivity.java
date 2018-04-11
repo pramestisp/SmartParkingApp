@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 
@@ -119,11 +120,11 @@ public class RegisterLoginActivity extends AppCompatActivity {
         else {
             final LoginRequestModel request = new LoginRequestModel(email, password);
 
-            network.Login(request, new Network.MyCallback<String>() {
+            network.Login(request, new Network.MyCallback<LoginResponse>() {
                 @Override
-                public void onSuccess(String response) {
+                public void onSuccess(LoginResponse response) {
                     Toast.makeText(RegisterLoginActivity.this,
-                            response,
+                            "Login success",
                             Toast.LENGTH_SHORT).show();
                     loading.dismiss();
                     startActivity(intentMain);

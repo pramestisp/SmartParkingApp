@@ -91,6 +91,8 @@ public class MainActivity extends AppCompatActivity
 
         final boolean available = true;
 
+
+
         if (available) {
             slot_1.setBackgroundResource(R.color.green);
             slot_2.setBackgroundResource(R.color.green);
@@ -228,7 +230,7 @@ public class MainActivity extends AppCompatActivity
         tvSlotNo.setText(slotName);
 
         priceCount();
-        tvPrice.setText("Rp " + price + ",00");
+        tvPrice.setText("Rp " + price);
 
         bViewSlot.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -336,6 +338,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void priceCount() {
+        timeDiff();
+
         bookFee = 10000;
         feePerHour = 3000;
         feePer30Min = 2000;

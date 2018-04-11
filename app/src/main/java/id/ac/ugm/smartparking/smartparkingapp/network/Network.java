@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import okhttp3.OkHttpClient;
@@ -22,12 +23,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.72.5.75:8000/api/";
+    public static final String BASE_URL_API = "http://10.72.42.98:8000/api/";
     private NetworkService service;
 
     public Network() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         //HeaderInterceptor headerInterceptor = new HeaderInterceptor();
+        AuthInterceptor authInterceptor = new AuthInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.addInterceptor(interceptor);
@@ -35,6 +37,7 @@ public class Network {
                 .connectTimeout(90, TimeUnit.SECONDS)
                 .writeTimeout(90, TimeUnit.SECONDS)
                 .readTimeout(90, TimeUnit.SECONDS)
+                .addInterceptor(authInterceptor)
                 .build();
 
         Gson gson = new Gson();
@@ -55,6 +58,7 @@ public class Network {
     public interface MyCallback<T> {
         void onSuccess(T response);
         void onError(String error);
+
     }
 
     public void Register (final RegisterRequestModel request, final MyCallback<String> callback) {
@@ -78,26 +82,77 @@ public class Network {
         });
     }
 
-    public void Login (final LoginRequestModel request, final MyCallback<String> callback) {
-        service.login(request).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response.isSuccessful()) {
-                    callback.onSuccess("Login success");
-                }
+    public void Login (final LoginRequestModel request, final MyCallback<LoginResponse> callback) {
+        service.login(request).enqueue(new Callback<LoginResponse>() {
 
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if(response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                }
                 else {
                     callback.onError("Login failed");
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
                 t.printStackTrace();
                 callback.onError(t.getLocalizedMessage());
             }
+
+//            @Override
+//            public void onResponse(Call<Response<LoginResponse>> call, Response<Response<LoginResponse>> response) {
+//                if (response.isSuccessful()) {
+//                    callback.onSuccess(response.LoginResponse);
+//                }
+//                else {
+//                    callback.onError("Login failed");
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Response<LoginResponse>> call, Throwable t) {
+//
+//            }
+
+//            @Override
+//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                if(response.isSuccessful()) {
+//                    callback.onSuccess(response.body());
+//                }
+//
+//                else {
+//                    callback.onError("Login failed");
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                t.printStackTrace();
+//                callback.onError(t.getLocalizedMessage());
+//            }
         });
     }
+
+//    public void getToken(final String token, final MyCallback<LoginResponse> callback) {
+//        service.getToken(token).enqueue(new Callback<LoginResponse>() {
+//            @Override
+//            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+//                if (response.isSuccessful()) {
+//                    callback.onSuccess(response.body());
+//                } else {
+//                    callback.onError("Something is wrong");
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<LoginResponse> call, Throwable t) {
+//                t.printStackTrace();
+//                callback.onError(t.getLocalizedMessage());
+//            }
+//        });
+//    }
 
     public void getSlot(final String hour, final MyCallback<CheckSlotResponse> callback) {
         service.getSlot(hour).enqueue(new Callback<CheckSlotResponse>() {
