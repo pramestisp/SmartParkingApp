@@ -2,11 +2,14 @@ package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,6 +19,7 @@ import android.widget.Toast;
 
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
+import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse.Meta;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 
@@ -47,6 +51,8 @@ public class RegisterLoginActivity extends AppCompatActivity {
     private Network network;
 
     private String name, email, car_type, license_no, password, confirm_pass;
+
+    public String authToken;
 
 
     @Override
@@ -126,6 +132,16 @@ public class RegisterLoginActivity extends AppCompatActivity {
                     Toast.makeText(RegisterLoginActivity.this,
                             "Login success",
                             Toast.LENGTH_SHORT).show();
+
+                    Meta meta = response.getMeta();
+                    authToken = meta.getToken();
+
+                    SharedPreferences pref = getSharedPreferences("token", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = pref.edit();
+
+                    editor.putString("token", authToken);
+                    editor.apply();
+
                     loading.dismiss();
                     startActivity(intentMain);
                 }
@@ -141,7 +157,6 @@ public class RegisterLoginActivity extends AppCompatActivity {
         }
 
     }
-
 
     private void requestRegister() {
 
@@ -178,6 +193,13 @@ public class RegisterLoginActivity extends AppCompatActivity {
         }
 
     }
+
+//    public String saveToken() {
+//        LoginResponse loginResponse = new LoginResponse();
+//        Meta meta = loginResponse.getMeta();
+//        String token = meta.getToken();
+//        return token;
+//    }
 
     private void getText() {
         name = inputName.getText().toString();

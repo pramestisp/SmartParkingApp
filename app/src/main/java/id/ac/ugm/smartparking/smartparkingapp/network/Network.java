@@ -29,7 +29,7 @@ public class Network {
     public Network() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         //HeaderInterceptor headerInterceptor = new HeaderInterceptor();
-        AuthInterceptor authInterceptor = new AuthInterceptor();
+        //AuthInterceptor authInterceptor = new AuthInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.addInterceptor(interceptor);
@@ -37,7 +37,6 @@ public class Network {
                 .connectTimeout(90, TimeUnit.SECONDS)
                 .writeTimeout(90, TimeUnit.SECONDS)
                 .readTimeout(90, TimeUnit.SECONDS)
-                .addInterceptor(authInterceptor)
                 .build();
 
         Gson gson = new Gson();
