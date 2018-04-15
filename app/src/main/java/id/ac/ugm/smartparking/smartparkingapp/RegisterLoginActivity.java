@@ -22,6 +22,7 @@ import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse.Meta;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
+import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 
 
 public class RegisterLoginActivity extends AppCompatActivity {
@@ -41,15 +42,11 @@ public class RegisterLoginActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
 
+    private SmartParkingSharedPreferences prefManager;
     private Intent intentMain;
-
-
     private ProgressDialog loading;
-
     private boolean isLogin = true;
-
     private Network network;
-
     private String name, email, car_type, license_no, password, confirm_pass;
 
     public String authToken;
@@ -59,6 +56,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        prefManager = new SmartParkingSharedPreferences(this);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -76,9 +74,12 @@ public class RegisterLoginActivity extends AppCompatActivity {
         toggleButton = findViewById(R.id.tvRegister);
         progressBar = findViewById(R.id.pbLogin);
 
+        inputEmail.setText("bebek@ayam.com");
+        inputPassword.setText("sayaarina");
 
 
-        network = new Network();
+
+        network = new Network(this);
 
         toggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,11 +137,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
                     Meta meta = response.getMeta();
                     authToken = meta.getToken();
 
-                    SharedPreferences pref = getSharedPreferences("token", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = pref.edit();
-
-                    editor.putString("token", authToken);
-                    editor.apply();
+                    prefManager.setString(SmartParkingSharedPreferences.PREF_TOKEN, authToken);
 
                     loading.dismiss();
                     startActivity(intentMain);

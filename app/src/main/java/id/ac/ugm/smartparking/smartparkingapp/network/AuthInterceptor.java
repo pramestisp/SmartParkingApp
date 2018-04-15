@@ -1,10 +1,11 @@
 package id.ac.ugm.smartparking.smartparkingapp.network;
 
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 
 import java.io.IOException;
 
+import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -15,16 +16,15 @@ import okhttp3.Response;
 
 public class AuthInterceptor implements Interceptor {
 
-    String token;
+    private SmartParkingSharedPreferences prefManager;
 
-
-    public void dataSource (Context context) {
-        SharedPreferences pref = context.getSharedPreferences("token", Context.MODE_PRIVATE);
-        String authToken = pref.getString("token", "");
+    AuthInterceptor(Context context) {
+        prefManager = new SmartParkingSharedPreferences(context);
     }
 
-    public Response intercept(Chain chain) throws IOException {
-        Request request = new Request.Builder()
+    public Response intercept(@NonNull Chain chain) throws IOException {
+        String token = prefManager.getString(SmartParkingSharedPreferences.PREF_TOKEN);
+        Request request = chain.request().newBuilder()
                 .header("Authorization", "Bearer " + token).build();
         return chain.proceed(request);
     }

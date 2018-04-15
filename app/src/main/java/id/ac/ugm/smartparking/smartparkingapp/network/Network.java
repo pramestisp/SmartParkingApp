@@ -1,5 +1,7 @@
 package id.ac.ugm.smartparking.smartparkingapp.network;
 
+import android.content.Context;
+
 import com.google.gson.Gson;
 
 import java.util.concurrent.TimeUnit;
@@ -23,16 +25,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.72.42.98:8000/api/";
+    public static final String BASE_URL_API = "http://192.168.0.186/smartparking-master/public/api/";
     private NetworkService service;
 
-    public Network() {
+    public Network(Context context) {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         //HeaderInterceptor headerInterceptor = new HeaderInterceptor();
-        //AuthInterceptor authInterceptor = new AuthInterceptor();
+        AuthInterceptor authInterceptor = new AuthInterceptor(context);
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.addInterceptor(interceptor);
+        builder.addInterceptor(authInterceptor);
         OkHttpClient client = builder
                 .connectTimeout(90, TimeUnit.SECONDS)
                 .writeTimeout(90, TimeUnit.SECONDS)
@@ -192,7 +195,21 @@ public class Network {
         });
     }
 
+    public void getAllSlot(final MyCallback<CheckSlotResponse> callback) {
+        service.getAllSlot().enqueue(new Callback<CheckSlotResponse>() {
+            @Override
+            public void onResponse(Call<CheckSlotResponse> call, Response<CheckSlotResponse> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Get Car Park Slot Error");
+                }
+            }
 
+            @Override
+            public void onFailure(Call<CheckSlotResponse> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
 }
-
-

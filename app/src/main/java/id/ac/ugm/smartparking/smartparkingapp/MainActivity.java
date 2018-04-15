@@ -3,7 +3,6 @@ package id.ac.ugm.smartparking.smartparkingapp;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -29,13 +28,15 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlot;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
-import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
+import id.ac.ugm.smartparking.smartparkingapp.utils.Constants;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        loading = new ProgressDialog(this);
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -83,25 +85,13 @@ public class MainActivity extends AppCompatActivity
 
         getIntent();
 
-        network = new Network();
+        network = new Network(this);
 
         slot_1 = findViewById(R.id.slot_1);
         slot_2 = findViewById(R.id.slot_2);
         slot_3 = findViewById(R.id.slot_3);
 
         final boolean available = true;
-
-
-
-        if (available) {
-            slot_1.setBackgroundResource(R.color.green);
-            slot_2.setBackgroundResource(R.color.green);
-            slot_3.setBackgroundResource(R.color.green);
-        } else {
-            slot_1.setBackgroundResource(R.color.red);
-            slot_2.setBackgroundResource(R.color.red);
-            slot_3.setBackgroundResource(R.color.red);
-        }
 
         final Button bBook = findViewById(R.id.bBook);
 
@@ -201,7 +191,42 @@ public class MainActivity extends AppCompatActivity
 
         });
 
+        checkCarParkSlot();
+    }
 
+    private void checkCarParkSlot() {
+        loading.setMessage("Checking Park Slot");
+        loading.show();
+        network.getAllSlot(new Network.MyCallback<CheckSlotResponse>() {
+            @Override
+            public void onSuccess(CheckSlotResponse response) {
+                loading.dismiss();
+                List<CheckSlot> slotList = response.data;
+                if (slotList.get(0).getStatus().equals(Constants.AVAILABLE)) {
+                    slot_1.setBackgroundResource(R.color.green);
+                } else {
+                    slot_1.setBackgroundResource(R.color.red);
+                }
+
+                if (slotList.get(1).getStatus().equals(Constants.AVAILABLE)) {
+                    slot_2.setBackgroundResource(R.color.green);
+                } else {
+                    slot_2.setBackgroundResource(R.color.red);
+                }
+
+                if (slotList.get(2).getStatus().equals(Constants.AVAILABLE)) {
+                    slot_3.setBackgroundResource(R.color.green);
+                } else {
+                    slot_3.setBackgroundResource(R.color.red);
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
+                loading.dismiss();
+            }
+        });
     }
 
     private void confirmDialog(String slotName) {
@@ -306,6 +331,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onSuccess(CheckSlotResponse response) {
                     loading.dismiss();
+                    idSlot = response.data.get(0).getIdSlot();
                     confirmDialog(response.data.get(0).getSlotName());
                 }
 

@@ -1,7 +1,5 @@
 package id.ac.ugm.smartparking.smartparkingapp.network;
 
-import java.sql.Ref;
-
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
@@ -9,10 +7,8 @@ import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -38,5 +34,6 @@ public interface NetworkService {
     @POST("addreservation")
     Call<ResponseBody> reservation(@Body ReservationRequestModel request);
 
-    //TODO: GET slot status
+    @GET("carparkslot")
+    Call<CheckSlotResponse> getAllSlot();
 }
