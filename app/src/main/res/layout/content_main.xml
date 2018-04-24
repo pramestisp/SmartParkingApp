@@ -22,7 +22,7 @@
 
 
 
-            <include layout="@layout/layout_grid"></include>
+            <include layout="@layout/layout_recyclerview"></include>
 
 
         </LinearLayout>

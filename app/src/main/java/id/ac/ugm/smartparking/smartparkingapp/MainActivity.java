@@ -2,12 +2,17 @@ package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -37,16 +42,18 @@ import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 import id.ac.ugm.smartparking.smartparkingapp.utils.Constants;
+import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private View slot_1, slot_2, slot_3;
+    //TODO: rombak grid layout jadi recycler view
 
     private EditText etFromTime;
     private EditText etToTime;
 
-    private TextView tvTime,tvPrice;
+    private TextView tvTime,tvPrice, tvName, tvEmail;
 
     private Button bCheck;
 
@@ -58,11 +65,15 @@ public class MainActivity extends AppCompatActivity
 
     int hour, min, bookFee, feePerHour, feePer30Min, idSlot;
 
-    String df_string_from, df_string_to;
+    String df_string_from, df_string_to, drawer_name, drawer_email;
 
     AlertDialog timeDialog, confirmDialog;
 
     ProgressDialog loading;
+
+    RecyclerViewAdapter adapter;
+
+    private SmartParkingSharedPreferences prefManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +102,15 @@ public class MainActivity extends AppCompatActivity
         slot_2 = findViewById(R.id.slot_2);
         slot_3 = findViewById(R.id.slot_3);
 
-        final boolean available = true;
+        tvName = findViewById(R.id.tvName);
+        tvEmail = findViewById(R.id.tvEmail);
+
+        prefManager = new SmartParkingSharedPreferences(this);
+        drawer_name = prefManager.getString(SmartParkingSharedPreferences.PREF_USER_NAME);
+        drawer_email = prefManager.getString(SmartParkingSharedPreferences.PREF_EMAIL);
+
+//        tvName.setText(drawer_name);
+//        tvEmail.setText(drawer_email);
 
         final Button bBook = findViewById(R.id.bBook);
 
@@ -149,7 +168,7 @@ public class MainActivity extends AppCompatActivity
 
                                         etFromTime.setText(df_string_from);
                                     }
-                                }, hourFrom, minuteFrom, true);
+                                }, hourFrom +2, minuteFrom, true);
                         fromTimePickerDialog.show();
                     }
                 });
@@ -183,7 +202,7 @@ public class MainActivity extends AppCompatActivity
                                 etToTime.setText(df_string_to);
 
                             }
-                        }, hourTo, minuteTo, true);
+                        }, hourTo +2, minuteTo, true);
                         toTimePickerDialog.show();
                     }
                 });
@@ -201,36 +220,58 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onSuccess(CheckSlotResponse response) {
                 loading.dismiss();
-                List<CheckSlot> slotList = response.data;
-                if (slotList.get(0).getStatus().equals(Constants.AVAILABLE)) {
-                    slot_1.setBackgroundResource(R.color.green);
-                } else {
-                    slot_1.setBackgroundResource(R.color.red);
-                }
+                List<CheckSlot> slotList = response.getData();
+                generateSlot(slotList);
+            }
 
-                if (slotList.get(1).getStatus().equals(Constants.AVAILABLE)) {
-                    slot_2.setBackgroundResource(R.color.green);
-                } else {
-                    slot_2.setBackgroundResource(R.color.red);
-                }
-
-                if (slotList.get(2).getStatus().equals(Constants.AVAILABLE)) {
-                    slot_3.setBackgroundResource(R.color.green);
-                } else {
-                    slot_3.setBackgroundResource(R.color.red);
-                }
+            private void generateSlot(List<CheckSlot> data) {
+                RecyclerView recyclerView = findViewById(R.id.rvSlots);
+                int columns = 1;
+                recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this, columns));
+                recyclerView.addItemDecoration(new SpacesItemDecoration(200));
+                adapter = new RecyclerViewAdapter(MainActivity.this, data);
+                recyclerView.setAdapter(adapter);
             }
 
             @Override
             public void onError(String error) {
-                Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
                 loading.dismiss();
+                Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
             }
         });
+//        network.getAllSlot(new Network.MyCallback<CheckSlotResponse>() {
+//            @Override
+//            public void onSuccess(CheckSlotResponse response) {
+//                loading.dismiss();
+//                List<CheckSlot> slotList = response.data;
+//                if (slotList.get(0).getStatus().equals(Constants.AVAILABLE)) {
+//                    slot_1.setBackgroundResource(R.color.green);
+//                } else {
+//                    slot_1.setBackgroundResource(R.color.red);
+//                }
+//
+//                if (slotList.get(1).getStatus().equals(Constants.AVAILABLE)) {
+//                    slot_2.setBackgroundResource(R.color.green);
+//                } else {
+//                    slot_2.setBackgroundResource(R.color.red);
+//                }
+//
+//                if (slotList.get(2).getStatus().equals(Constants.AVAILABLE)) {
+//                    slot_3.setBackgroundResource(R.color.green);
+//                } else {
+//                    slot_3.setBackgroundResource(R.color.red);
+//                }
+//            }
+//
+//            @Override
+//            public void onError(String error) {
+//                Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
+//                loading.dismiss();
+//            }
+//        });
     }
 
     private void confirmDialog(String slotName) {
-        //TODO: POST data reservasi
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         View mView = getLayoutInflater().inflate(R.layout.dialog_confirm, null);
@@ -326,7 +367,9 @@ public class MainActivity extends AppCompatActivity
 
         else {
             String params = etFromTime.getText().toString() + "-" + etToTime.getText().toString();
-            loading = ProgressDialog.show(MainActivity.this, null, "Checking", true, false);
+            loading.setMessage("Checking");
+            loading.setCancelable(false);
+            loading.show();
             network.getSlot(params, new Network.MyCallback<CheckSlotResponse>() {
                 @Override
                 public void onSuccess(CheckSlotResponse response) {
@@ -394,7 +437,11 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            Intent close = new Intent(Intent.ACTION_MAIN);
+            close.addCategory(Intent.CATEGORY_HOME);
+            close.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(close);
+            //super.onBackPressed();
         }
     }
 
@@ -414,7 +461,19 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (id == R.id.nav_logout) {
-
+            final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage("Are you sure?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            final String token = prefManager.getString(SmartParkingSharedPreferences.PREF_TOKEN);
+                            SharedPreferences.Editor editor = prefManager.clear();
+                            Intent intentLogin = new Intent(MainActivity.this, RegisterLoginActivity.class);
+                            startActivity(intentLogin);
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
         }
 
         if(fragment != null) {

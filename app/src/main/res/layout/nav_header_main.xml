@@ -23,13 +23,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:text="Shindy Putri Pramesti"
+        android:id="@+id/tvName"
+        android:text="Name"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tvEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="shindy.putri@yahoo.co.id" />
+        android:text="name@mail.com" />
 
 </LinearLayout>

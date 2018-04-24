@@ -25,7 +25,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://192.168.0.186/smartparking-master/public/api/";
+    public static final String BASE_URL_API = "http://10.72.24.155/smartparking-master/public/api/";
     private NetworkService service;
 
     public Network(Context context) {

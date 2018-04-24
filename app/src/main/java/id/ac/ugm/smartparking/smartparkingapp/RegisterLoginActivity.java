@@ -46,11 +46,11 @@ public class RegisterLoginActivity extends AppCompatActivity {
     private Intent intentMain;
     private ProgressDialog loading;
     private boolean isLogin = true;
+    private boolean logged = true;
     private Network network;
-    private String name, email, car_type, license_no, password, confirm_pass;
+    private String name, email, car_type, license_no, password, confirm_pass, authToken;
 
-    public String authToken;
-
+    public String drawer_name, drawer_email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,8 +77,6 @@ public class RegisterLoginActivity extends AppCompatActivity {
         inputEmail.setText("bebek@ayam.com");
         inputPassword.setText("sayaarina");
 
-
-
         network = new Network(this);
 
         toggleButton.setOnClickListener(new View.OnClickListener() {
@@ -103,15 +101,11 @@ public class RegisterLoginActivity extends AppCompatActivity {
                     //register with email
                     loading = ProgressDialog.show(RegisterLoginActivity.this, null, "Please wait", true, false);
                     requestRegister();
-
-
                 }
             }
 
         });
-
     }
-
 
     private void requestLogin() {
 
@@ -135,12 +129,25 @@ public class RegisterLoginActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
 
                     Meta meta = response.getMeta();
+                    LoginResponse.Data data = response.getData();
+
+                    drawer_name = data.getName();
+                    drawer_email = data.getEmail();
                     authToken = meta.getToken();
 
+                    prefManager.setString(SmartParkingSharedPreferences.PREF_USER_NAME, drawer_name);
+                    prefManager.setString(SmartParkingSharedPreferences.PREF_EMAIL, drawer_email);
                     prefManager.setString(SmartParkingSharedPreferences.PREF_TOKEN, authToken);
+                    prefManager.setBoolean(SmartParkingSharedPreferences.PREF_LOGGED, logged);
 
                     loading.dismiss();
-                    startActivity(intentMain);
+
+                    if(prefManager.getBoolean(SmartParkingSharedPreferences.PREF_LOGGED)) {
+                        startActivity(intentMain);
+                    }
+                    else {
+                        return;
+                    }
                 }
 
                 @Override
