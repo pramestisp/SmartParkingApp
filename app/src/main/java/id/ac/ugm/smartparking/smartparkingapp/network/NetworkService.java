@@ -5,6 +5,7 @@ import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -32,8 +33,11 @@ public interface NetworkService {
 
     @Headers("Accept: application/json")
     @POST("addreservation")
-    Call<ResponseBody> reservation(@Body ReservationRequestModel request);
+    Call<ReservationResponse> reservation(@Body ReservationRequestModel request);
 
     @GET("carparkslot")
     Call<CheckSlotResponse> getAllSlot();
+
+//    @GET("addreservation")
+//    Call<ReservationResponse> getReservation();
 }

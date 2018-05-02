@@ -11,6 +11,7 @@ import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -25,7 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.72.24.155/smartparking-master/public/api/";
+    public static final String BASE_URL_API = "http://10.72.42.98:8000/api/";
     private NetworkService service;
 
     public Network(Context context) {
@@ -103,58 +104,8 @@ public class Network {
                 callback.onError(t.getLocalizedMessage());
             }
 
-//            @Override
-//            public void onResponse(Call<Response<LoginResponse>> call, Response<Response<LoginResponse>> response) {
-//                if (response.isSuccessful()) {
-//                    callback.onSuccess(response.LoginResponse);
-//                }
-//                else {
-//                    callback.onError("Login failed");
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Response<LoginResponse>> call, Throwable t) {
-//
-//            }
-
-//            @Override
-//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                if(response.isSuccessful()) {
-//                    callback.onSuccess(response.body());
-//                }
-//
-//                else {
-//                    callback.onError("Login failed");
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                t.printStackTrace();
-//                callback.onError(t.getLocalizedMessage());
-//            }
         });
     }
-
-//    public void getToken(final String token, final MyCallback<LoginResponse> callback) {
-//        service.getToken(token).enqueue(new Callback<LoginResponse>() {
-//            @Override
-//            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-//                if (response.isSuccessful()) {
-//                    callback.onSuccess(response.body());
-//                } else {
-//                    callback.onError("Something is wrong");
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<LoginResponse> call, Throwable t) {
-//                t.printStackTrace();
-//                callback.onError(t.getLocalizedMessage());
-//            }
-//        });
-//    }
 
     public void getSlot(final String hour, final MyCallback<CheckSlotResponse> callback) {
         service.getSlot(hour).enqueue(new Callback<CheckSlotResponse>() {
@@ -175,20 +126,19 @@ public class Network {
         });
     }
 
-    public void Reservation(final ReservationRequestModel request, final MyCallback<String> callback) {
-        service.reservation(request).enqueue(new Callback<ResponseBody>() {
+    public void Reservation(final ReservationRequestModel request, final MyCallback<ReservationResponse> callback) {
+        service.reservation(request).enqueue(new Callback<ReservationResponse>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response.isSuccessful()) {
-                    callback.onSuccess("Reservation success");
-                }
-                else {
+            public void onResponse(Call<ReservationResponse> call, Response<ReservationResponse> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
                     callback.onError("Reservation failed");
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<ReservationResponse> call, Throwable t) {
                 t.printStackTrace();
                 callback.onError(t.getLocalizedMessage());
             }
@@ -212,4 +162,20 @@ public class Network {
             }
         });
     }
+
+//    public void getReservation(final MyCallback<ReservationResponse> callback) {
+//        service.getReservation().enqueue(new Callback<ReservationResponse>() {
+//            @Override
+//            public void onResponse(Call<ReservationResponse> call, Response<ReservationResponse> response) {
+//                if (response.isSuccessful()) {
+//                    callback.onSuccess(response.body());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ReservationResponse> call, Throwable t) {
+//
+//            }
+//        });
+//    }
 }

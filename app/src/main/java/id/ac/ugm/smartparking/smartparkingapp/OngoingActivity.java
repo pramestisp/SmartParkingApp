@@ -3,12 +3,11 @@ package id.ac.ugm.smartparking.smartparkingapp;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.PersistableBundle;
 import android.os.Vibrator;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +17,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.google.zxing.BarcodeFormat;
@@ -27,21 +25,24 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-import java.sql.Time;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import id.ac.ugm.smartparking.smartparkingapp.MainActivity;
+import id.ac.ugm.smartparking.smartparkingapp.network.Network;
+import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 
 /**
  * Created by Shindy on 31-Mar-18.
  */
-
-public class TimeRemainingActivity extends AppCompatActivity {
+//TODO: Rapiin timeremainingactivity biar nanti bisa dilist di tab history --> Ongoing
+public class OngoingActivity extends AppCompatActivity {
 
     TextView tvTimeCountdown;
+
+    private Network network;
+
+    private SmartParkingSharedPreferences prefManager;
 
     private long timeLeft;
 
@@ -49,14 +50,20 @@ public class TimeRemainingActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_time_remaining);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        network = new Network(this);
+        prefManager = new SmartParkingSharedPreferences(this);
         tvTimeCountdown = findViewById(R.id.tvTime);
-        final EditText etQRtext = findViewById(R.id.etTextToGenerate);
+        //final EditText etQRtext = findViewById(R.id.etTextToGenerate);
         Button bQR = findViewById(R.id.bShowQR);
 
         getIntent();
 
-        long fromTime = MainActivity.fromMillis;
+        long fromTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_FROM);
         long currentTime = Calendar.getInstance().getTimeInMillis();
 
         timeLeft = fromTime - currentTime;
@@ -70,9 +77,9 @@ public class TimeRemainingActivity extends AppCompatActivity {
             public void onTick(long millisUntilFinished) {
                 timeLeft = millisUntilFinished;
                 updateText();
-                //TODO: notification & alert ketika countdown 15 menit
+                //TODO: notification & alert ketika countdown 15 menit // gmn biar ga ilang timernya ketika di-close
                 if (millisUntilFinished == 900000) {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(TimeRemainingActivity.this);
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(OngoingActivity.this);
                     builder.setMessage("You got 15 minutes left")
                             .setPositiveButton("OK", null).show();
 
@@ -92,7 +99,7 @@ public class TimeRemainingActivity extends AppCompatActivity {
         bQR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder mBuilder = new AlertDialog.Builder(TimeRemainingActivity.this);
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(OngoingActivity.this);
                 View mView = getLayoutInflater().inflate(R.layout.dialog_qr_code, null);
 
                 mBuilder.setView(mView);
@@ -101,10 +108,12 @@ public class TimeRemainingActivity extends AppCompatActivity {
 
                 ImageView ivQR = mView.findViewById(R.id.ivQR);
 
-                String textQR = etQRtext.getText().toString().trim();
+                int id_reservation = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
+                String textQR = String.valueOf(id_reservation);
+                Log.i("id", textQR);
                 MultiFormatWriter mfw = new MultiFormatWriter();
                 try {
-                    BitMatrix bm = mfw.encode(textQR, BarcodeFormat.QR_CODE, 200, 200);
+                    BitMatrix bm = mfw.encode(textQR, BarcodeFormat.QR_CODE, 500, 500);
                     BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
                     Bitmap bitmap = barcodeEncoder.createBitmap(bm);
                     ivQR.setImageBitmap(bitmap);
@@ -114,7 +123,7 @@ public class TimeRemainingActivity extends AppCompatActivity {
             }
         });
     }
-
+//TODO: pikirkan ketika mobil sudah sampe, bikin alarm ketika kelamaan parkir + kena tarif penalti
 //    private void Timer() {
 //        countTime();
 //        new CountDownTimer(timeLeft, 1000) {
@@ -166,6 +175,11 @@ public class TimeRemainingActivity extends AppCompatActivity {
 
         mBuilder.flags |= Notification.FLAG_AUTO_CANCEL;
         notif.notify(0, mBuilder);
+    }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(OngoingActivity.this, MainActivity.class));
     }
 }
 

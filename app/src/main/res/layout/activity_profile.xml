@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar">
+    </include>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/toolbar"
+        android:background="@color/colorPrimaryLight"
+        android:paddingBottom="15dp"
+        android:id="@+id/rl_1">
+
+        <ImageView
+            android:id="@+id/ivProfilePhoto"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="15dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/imageview_circle"
+            android:padding="3dp"
+            android:scaleType="centerInside" />
+        <!--TODO: circular image-->
+        <TextView
+            android:id="@+id/tvProfileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ivProfilePhoto"
+            android:layout_marginTop="10sp"
+            android:layout_centerHorizontal="true"
+            android:text="Name"
+            android:textColor="#000000"
+            android:textSize="30sp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/rl_1">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Email"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvProfileEmail"
+                    android:text="name@mail.com"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Car Type"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvProfileCarType"
+                    android:text="xxxxx"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Car License Number"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="xxxxxxxx"
+                    android:id="@+id/tvProfileCarNo"
+                    android:textColor="#000000"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_alignParentBottom="true">
+
+            <Button
+                android:id="@+id/bBook"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="edit profile"
+                android:background="#F57C00"
+                android:textColor="#FFFF"/>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+
+</RelativeLayout>

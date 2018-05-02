@@ -2,14 +2,11 @@ package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,7 +47,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
     private Network network;
     private String name, email, car_type, license_no, password, confirm_pass, authToken;
 
-    public String drawer_name, drawer_email;
+    public String profile_name, profile_email, profile_car_type, profile_car_no;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,12 +128,16 @@ public class RegisterLoginActivity extends AppCompatActivity {
                     Meta meta = response.getMeta();
                     LoginResponse.Data data = response.getData();
 
-                    drawer_name = data.getName();
-                    drawer_email = data.getEmail();
+                    profile_name = data.getName();
+                    profile_email = data.getEmail();
+                    profile_car_type = data.getCarType();
+                    profile_car_no = data.getLicensePlateNumber();
                     authToken = meta.getToken();
 
-                    prefManager.setString(SmartParkingSharedPreferences.PREF_USER_NAME, drawer_name);
-                    prefManager.setString(SmartParkingSharedPreferences.PREF_EMAIL, drawer_email);
+                    prefManager.setString(SmartParkingSharedPreferences.PREF_USER_NAME, profile_name);
+                    prefManager.setString(SmartParkingSharedPreferences.PREF_EMAIL, profile_email);
+                    prefManager.setString(SmartParkingSharedPreferences.PREF_CAR_TYPE, profile_car_type);
+                    prefManager.setString(SmartParkingSharedPreferences.PREF_CAR_NO, profile_car_no);
                     prefManager.setString(SmartParkingSharedPreferences.PREF_TOKEN, authToken);
                     prefManager.setBoolean(SmartParkingSharedPreferences.PREF_LOGGED, logged);
 
@@ -197,13 +198,6 @@ public class RegisterLoginActivity extends AppCompatActivity {
         }
 
     }
-
-//    public String saveToken() {
-//        LoginResponse loginResponse = new LoginResponse();
-//        Meta meta = loginResponse.getMeta();
-//        String token = meta.getToken();
-//        return token;
-//    }
 
     private void getText() {
         name = inputName.getText().toString();

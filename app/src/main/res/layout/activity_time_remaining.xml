@@ -1,42 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp">
+    android:layout_height="match_parent">
 
-    <TextView
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar" />
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Time Remaining"
-        android:textAlignment="center"
-        android:textSize="22sp"/>
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:orientation="vertical"
+        android:padding="10dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:textSize="56sp"
-        android:id="@+id/tvTime"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Time Remaining"
+            android:textAlignment="center"
+            android:textSize="22sp" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="QR Code"
-        android:textAlignment="center"
-        android:textSize="22sp"/>
+        <TextView
+            android:id="@+id/tvTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="56sp" />
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/etTextToGenerate"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="show qr code"
-        android:id="@+id/bShowQR"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="QR Code"
+            android:textAlignment="center"
+            android:textSize="22sp" />
 
 
-</LinearLayout>
+        <Button
+            android:id="@+id/bShowQR"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show qr code" />
+
+
+    </LinearLayout>
+
+</RelativeLayout>

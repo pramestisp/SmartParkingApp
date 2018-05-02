@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".RegisterLoginActivity">
+        <activity android:name=".RegisterLoginActivity"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,11 +24,25 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme" />
-        <activity android:name=".TimeRemainingActivity" />
+        <activity
+            android:name=".OngoingActivity"
+            android:label="Ongoing"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".ProfileActivity"
+            android:label="Profile"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
         <activity android:name=".ViewSlotActivity" />
-        <!-- <activity android:name=".ChooseTimeActivity" /> -->
+        <activity android:name=".testResult" />
 
-        <activity android:name=".testResult"/>
     </application>
 
 </manifest>

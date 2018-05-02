@@ -2,7 +2,6 @@ package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -40,15 +39,12 @@ import java.util.concurrent.TimeUnit;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlot;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
-import id.ac.ugm.smartparking.smartparkingapp.utils.Constants;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
-
-    private View slot_1, slot_2, slot_3;
-    //TODO: rombak grid layout jadi recycler view
 
     private EditText etFromTime;
     private EditText etToTime;
@@ -59,7 +55,7 @@ public class MainActivity extends AppCompatActivity
 
     private Network network;
 
-    public static long fromMillis, toMillis, diff;
+    long fromMillis, toMillis, diff;
 
     float price;
 
@@ -71,9 +67,11 @@ public class MainActivity extends AppCompatActivity
 
     ProgressDialog loading;
 
-    RecyclerViewAdapter adapter;
+    RecyclerViewMainAdapter adapter;
 
     private SmartParkingSharedPreferences prefManager;
+
+    private boolean reserved = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,23 +92,20 @@ public class MainActivity extends AppCompatActivity
         navigationView.getMenu().getItem(0). setChecked(true);
         onNavigationItemSelected(navigationView.getMenu().getItem(0));
 
+        View headerView = navigationView.getHeaderView(0);
         getIntent();
 
         network = new Network(this);
 
-        slot_1 = findViewById(R.id.slot_1);
-        slot_2 = findViewById(R.id.slot_2);
-        slot_3 = findViewById(R.id.slot_3);
-
-        tvName = findViewById(R.id.tvName);
-        tvEmail = findViewById(R.id.tvEmail);
+        tvName = headerView.findViewById(R.id.tvName);
+        tvEmail = headerView.findViewById(R.id.tvEmail);
 
         prefManager = new SmartParkingSharedPreferences(this);
         drawer_name = prefManager.getString(SmartParkingSharedPreferences.PREF_USER_NAME);
         drawer_email = prefManager.getString(SmartParkingSharedPreferences.PREF_EMAIL);
 
-//        tvName.setText(drawer_name);
-//        tvEmail.setText(drawer_email);
+        tvName.setText(drawer_name);
+        tvEmail.setText(drawer_email);
 
         final Button bBook = findViewById(R.id.bBook);
 
@@ -159,6 +154,7 @@ public class MainActivity extends AppCompatActivity
                                                 minute
                                         );
                                         fromMillis = cal.getTimeInMillis();
+                                        prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_FROM, fromMillis);
 
                                         Date fromTime = cal.getTime();
 
@@ -213,7 +209,7 @@ public class MainActivity extends AppCompatActivity
         checkCarParkSlot();
     }
 
-    private void checkCarParkSlot() {
+    public void checkCarParkSlot() {
         loading.setMessage("Checking Park Slot");
         loading.show();
         network.getAllSlot(new Network.MyCallback<CheckSlotResponse>() {
@@ -229,7 +225,7 @@ public class MainActivity extends AppCompatActivity
                 int columns = 1;
                 recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this, columns));
                 recyclerView.addItemDecoration(new SpacesItemDecoration(200));
-                adapter = new RecyclerViewAdapter(MainActivity.this, data);
+                adapter = new RecyclerViewMainAdapter(MainActivity.this, data);
                 recyclerView.setAdapter(adapter);
             }
 
@@ -313,15 +309,19 @@ public class MainActivity extends AppCompatActivity
                 final ReservationRequestModel request = new ReservationRequestModel(idSlot, df_string_from, df_string_to, price);
                 loading.show();
 
-                final Intent intent = new Intent(v.getContext(), TimeRemainingActivity.class);
+                final Intent intent = new Intent(v.getContext(), OngoingActivity.class);
 
-                network.Reservation(request, new Network.MyCallback<String>() {
+                network.Reservation(request, new Network.MyCallback<ReservationResponse>() {
                     @Override
-                    public void onSuccess(String response) {
+                    public void onSuccess(ReservationResponse response) {
                         loading.dismiss();
                         Toast.makeText(MainActivity.this,
-                                response,
+                                "Reservation success",
                                 Toast.LENGTH_SHORT).show();
+                        ReservationResponse.Data data = response.getData();
+                        int reservation_id = data.getIdUserPark();
+                        prefManager.setBoolean(SmartParkingSharedPreferences.PREF_RESERVED, reserved);
+                        prefManager.setInt(SmartParkingSharedPreferences.PREF_ID, reservation_id);
                         startActivity(intent);
                     }
 
@@ -423,13 +423,13 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public long getFromMillis() {
-        return fromMillis;
-    }
-
-    public void setFromMillis(long fromMillis) {
-        this.fromMillis = fromMillis;
-    }
+//    public long getFromMillis() {
+//        return fromMillis;
+//    }
+//
+//    public void setFromMillis(long fromMillis) {
+//        this.fromMillis = fromMillis;
+//    }
 
     @Override
     public void onBackPressed() {
@@ -457,6 +457,23 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
 
+
+        }
+
+        if (id == R.id.nav_profile) {
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        }
+
+        if (id == R.id.nav_ongoing) {
+            if(prefManager.getBoolean(SmartParkingSharedPreferences.PREF_RESERVED)) {
+                Intent intent = new Intent(MainActivity.this, OngoingActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(MainActivity.this,
+                        "You don't have any ongoing reservations",
+                        Toast.LENGTH_SHORT).show();
+            }
 
         }
 
