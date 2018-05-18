@@ -128,13 +128,13 @@
             android:gravity="center"
             android:layout_alignParentBottom="true">
 
-            <Button
-                android:id="@+id/bBook"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="edit profile"
-                android:background="#F57C00"
-                android:textColor="#FFFF"/>
+            <!--<Button-->
+                <!--android:id="@+id/bBook"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="edit profile"-->
+                <!--android:background="#F57C00"-->
+                <!--android:textColor="#FFFF"/>-->
 
         </LinearLayout>
     </RelativeLayout>

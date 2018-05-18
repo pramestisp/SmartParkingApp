@@ -6,5 +6,6 @@ package id.ac.ugm.smartparking.smartparkingapp.utils;
 
 public class Constants {
     public static final String OCCUPIED = "OCCUPIED";
+    public static final String PARKED = "PARKED";
     public static final String AVAILABLE = "AVAILABLE";
 }

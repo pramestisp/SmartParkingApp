@@ -38,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlot;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
+import id.ac.ugm.smartparking.smartparkingapp.model.GetAllSlotsResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
@@ -54,6 +55,8 @@ public class MainActivity extends AppCompatActivity
     private Button bCheck;
 
     private Network network;
+
+    private AlertDialog.Builder mBuilder;
 
     long fromMillis, toMillis, diff;
 
@@ -109,9 +112,10 @@ public class MainActivity extends AppCompatActivity
 
         final Button bBook = findViewById(R.id.bBook);
 
+        mBuilder = new AlertDialog.Builder(MainActivity.this);
+
         bBook.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
                 View mView = getLayoutInflater().inflate(R.layout.dialog_choose_time, null);
 
                 etFromTime = mView.findViewById(R.id.etFromTime);
@@ -189,6 +193,7 @@ public class MainActivity extends AppCompatActivity
                                         minute
                                 );
                                 toMillis = cal.getTimeInMillis();
+                                prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_TO, toMillis);
 
                                 Date toTime = cal.getTime();
 
@@ -212,9 +217,9 @@ public class MainActivity extends AppCompatActivity
     public void checkCarParkSlot() {
         loading.setMessage("Checking Park Slot");
         loading.show();
-        network.getAllSlot(new Network.MyCallback<CheckSlotResponse>() {
+        network.getAllSlot(new Network.MyCallback<GetAllSlotsResponse>() {
             @Override
-            public void onSuccess(CheckSlotResponse response) {
+            public void onSuccess(GetAllSlotsResponse response) {
                 loading.dismiss();
                 List<CheckSlot> slotList = response.getData();
                 generateSlot(slotList);
@@ -235,9 +240,9 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
             }
         });
-//        network.getAllSlot(new Network.MyCallback<CheckSlotResponse>() {
+//        network.getAllSlot(new Network.MyCallback<GetAllSlotsResponse>() {
 //            @Override
-//            public void onSuccess(CheckSlotResponse response) {
+//            public void onSuccess(GetAllSlotsResponse response) {
 //                loading.dismiss();
 //                List<CheckSlot> slotList = response.data;
 //                if (slotList.get(0).getStatus().equals(Constants.AVAILABLE)) {
@@ -268,13 +273,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void confirmDialog(String slotName) {
-
-        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         View mView = getLayoutInflater().inflate(R.layout.dialog_confirm, null);
 
-        builder.setView(mView);
-        builder.setCancelable(false);
-        confirmDialog = builder.create();
+        mBuilder.setView(mView);
+        mBuilder.setCancelable(false);
+        confirmDialog = mBuilder.create();
         confirmDialog.show();
 
         TextView tvSlotNo = mView.findViewById(R.id.tvSlotNo);
@@ -290,6 +293,7 @@ public class MainActivity extends AppCompatActivity
         tvFromTime.setText(df_string_from);
         tvToTime.setText(df_string_to);
         tvSlotNo.setText(slotName);
+        prefManager.setString(SmartParkingSharedPreferences.PREF_SLOT_NAME, slotName);
 
         priceCount();
         tvPrice.setText("Rp " + price);
@@ -374,8 +378,8 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onSuccess(CheckSlotResponse response) {
                     loading.dismiss();
-                    idSlot = response.data.get(0).getIdSlot();
-                    confirmDialog(response.data.get(0).getSlotName());
+                    idSlot = response.data.getIdSlot();
+                    confirmDialog(response.data.getSlotName());
                 }
 
                 @Override
@@ -406,7 +410,7 @@ public class MainActivity extends AppCompatActivity
         Log.e("sec", String.valueOf(secondsRemaining));
     }
 
-    private void priceCount() {
+    public void priceCount() {
         timeDiff();
 
         bookFee = 10000;
@@ -420,16 +424,10 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
+        prefManager.setFloat(SmartParkingSharedPreferences.PREF_PRICE, price);
 
     }
 
-//    public long getFromMillis() {
-//        return fromMillis;
-//    }
-//
-//    public void setFromMillis(long fromMillis) {
-//        this.fromMillis = fromMillis;
-//    }
 
     @Override
     public void onBackPressed() {
@@ -478,8 +476,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (id == R.id.nav_logout) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setMessage("Are you sure?")
+            mBuilder.setMessage("Are you sure?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

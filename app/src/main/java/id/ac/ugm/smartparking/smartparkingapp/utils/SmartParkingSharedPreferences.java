@@ -18,8 +18,12 @@ public class SmartParkingSharedPreferences {
     public static final String PREF_CAR_NO = "car_no";
     public static final String PREF_LOGGED = "logged";
     public static final String PREF_RESERVED = "reserved";
+    public static final String PREF_ARRIVED = "arrived";
     public static final String PREF_ID = "reservation_id";
+    public static final String PREF_SLOT_NAME = "slot_name";
     public static final String PREF_TIME_FROM = "time_from";
+    public static final String PREF_TIME_TO = "time_to";
+    public static final String PREF_PRICE = "price";
 
     public SmartParkingSharedPreferences(Context context) {
         sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -61,4 +65,13 @@ public class SmartParkingSharedPreferences {
     public long getLong(String key) {
         return sharedPreferences.getLong(key, 0);
     }
+
+    public void setFloat(String key, float value) {
+        sharedPreferences.edit().putFloat(key, value).apply();
+    }
+
+    public float getFloat(String key) {
+        return sharedPreferences.getFloat(key, 0);
+    }
+
 }

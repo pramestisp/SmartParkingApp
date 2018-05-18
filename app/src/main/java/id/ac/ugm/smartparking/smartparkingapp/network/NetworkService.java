@@ -1,6 +1,7 @@
 package id.ac.ugm.smartparking.smartparkingapp.network;
 
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
+import id.ac.ugm.smartparking.smartparkingapp.model.GetAllSlotsResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
@@ -36,8 +37,6 @@ public interface NetworkService {
     Call<ReservationResponse> reservation(@Body ReservationRequestModel request);
 
     @GET("carparkslot")
-    Call<CheckSlotResponse> getAllSlot();
+    Call<GetAllSlotsResponse> getAllSlot();
 
-//    @GET("addreservation")
-//    Call<ReservationResponse> getReservation();
 }

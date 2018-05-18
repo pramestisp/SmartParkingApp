@@ -1,26 +1,31 @@
 package id.ac.ugm.smartparking.smartparkingapp.model;
 
-import java.util.List;
 import com.google.gson.annotations.SerializedName;
+
+/**
+ * Created by Shindy on 09-May-18.
+ */
 
 public class CheckSlotResponse {
 
-	@SerializedName("data")
-	public List<CheckSlot> data;
+    @SerializedName("data")
+    public CheckSlot data;
 
-	public void setData(List<CheckSlot> data){
-		this.data = data;
-	}
+    public void setData(CheckSlot data){
+        this.data = data;
+    }
 
-	public List<CheckSlot> getData(){
-		return data;
-	}
+    public CheckSlot getData(){
+        return data;
+    }
 
-	@Override
- 	public String toString(){
-		return 
-			"CheckSlotResponse{" +
-			"data = '" + data + '\'' + 
-			"}";
-		}
+    @Override
+    public String toString(){
+        return
+                "CheckSlotResponse{" +
+                        "data = '" + data + '\'' +
+                        "}";
+    }
 }
+
+

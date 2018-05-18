@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import java.util.concurrent.TimeUnit;
 
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
+import id.ac.ugm.smartparking.smartparkingapp.model.GetAllSlotsResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
@@ -26,7 +27,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.72.42.98:8000/api/";
+    public static final String BASE_URL_API = "http://10.72.9.70:8000/api/";
+//    public static final String BASE_URL_API = "http://10.72.20.21/smartparking/public/api/";
     private NetworkService service;
 
     public Network(Context context) {
@@ -114,7 +116,7 @@ public class Network {
                 if (response.isSuccessful()) {
                     callback.onSuccess(response.body());
                 } else {
-                    callback.onError("Something is wrong");
+                    callback.onError("Something went wrong or there is no available slots");
                 }
             }
 
@@ -145,10 +147,10 @@ public class Network {
         });
     }
 
-    public void getAllSlot(final MyCallback<CheckSlotResponse> callback) {
-        service.getAllSlot().enqueue(new Callback<CheckSlotResponse>() {
+    public void getAllSlot(final MyCallback<GetAllSlotsResponse> callback) {
+        service.getAllSlot().enqueue(new Callback<GetAllSlotsResponse>() {
             @Override
-            public void onResponse(Call<CheckSlotResponse> call, Response<CheckSlotResponse> response) {
+            public void onResponse(Call<GetAllSlotsResponse> call, Response<GetAllSlotsResponse> response) {
                 if (response.isSuccessful()) {
                     callback.onSuccess(response.body());
                 } else {
@@ -157,25 +159,11 @@ public class Network {
             }
 
             @Override
-            public void onFailure(Call<CheckSlotResponse> call, Throwable t) {
+            public void onFailure(Call<GetAllSlotsResponse> call, Throwable t) {
                 callback.onError(t.getLocalizedMessage());
             }
         });
     }
 
-//    public void getReservation(final MyCallback<ReservationResponse> callback) {
-//        service.getReservation().enqueue(new Callback<ReservationResponse>() {
-//            @Override
-//            public void onResponse(Call<ReservationResponse> call, Response<ReservationResponse> response) {
-//                if (response.isSuccessful()) {
-//                    callback.onSuccess(response.body());
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ReservationResponse> call, Throwable t) {
-//
-//            }
-//        });
-//    }
+
 }

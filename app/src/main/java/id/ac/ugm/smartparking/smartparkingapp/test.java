@@ -51,11 +51,11 @@ public class test extends AppCompatActivity {
         setContentView(R.layout.activity_test);
         Timer();
 
-        etText = findViewById(R.id.etTextToGenerate);
-        bQR = findViewById(R.id.bShowQR);
-        ivQR  = findViewById(R.id.ivQR);
-        tvCountdown = findViewById(R.id.tvCountdown);
-        bNotif = findViewById(R.id.bNotif);
+//        etText = findViewById(R.id.etTextToGenerate);
+//        bQR = findViewById(R.id.bShowQR);
+//        ivQR  = findViewById(R.id.ivQR);
+//        tvCountdown = findViewById(R.id.tvCountdown);
+//        bNotif = findViewById(R.id.bNotif);
 
 //        builder = new NotificationCompat.Builder(this);
 //        builder.setSmallIcon(R.drawable.ic_notifications_black_24dp);

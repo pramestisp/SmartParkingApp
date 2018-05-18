@@ -1,29 +1,30 @@
 package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.List;
 
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlot;
 import id.ac.ugm.smartparking.smartparkingapp.utils.Constants;
+import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 
 /**
- * Created by Shindy on 19-Apr-18.
+ * Created by Shindy on 18-May-18.
  */
 
-public class RecyclerViewMainAdapter extends RecyclerView.Adapter<RecyclerViewMainAdapter.ViewHolder>{
+class RecyclerViewSlotAdapter extends RecyclerView.Adapter<RecyclerViewSlotAdapter.ViewHolder> {
     private Context context;
     private List<CheckSlot> slotList;
     private LayoutInflater inflater;
 
-    public RecyclerViewMainAdapter(Context context, List<CheckSlot> slotList) {
+    public RecyclerViewSlotAdapter(Context context, List<CheckSlot> slotList) {
         this.inflater = LayoutInflater.from(context);
         this.slotList = slotList;
         this.context = context;
@@ -40,28 +41,33 @@ public class RecyclerViewMainAdapter extends RecyclerView.Adapter<RecyclerViewMa
         holder.bindData(slotList.get(position));
     }
 
+
     @Override
     public int getItemCount() {
         return slotList.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout slotLayout;
+        TextView tvSlot;
+        SmartParkingSharedPreferences pref;
+        String slotName;
 
-        ViewHolder(View view) {
+        public ViewHolder(View view) {
             super(view);
             slotLayout = view.findViewById(R.id.layoutSlot);
+            tvSlot = view.findViewById(R.id.tvInfo);
         }
 
-        private void bindData(CheckSlot slot) {
-            if (slot.getStatus().equals(Constants.AVAILABLE)) {
-                slotLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.green));
+        public void bindData(CheckSlot slot) {
+            pref = new SmartParkingSharedPreferences(context);
+            slotName = slot.getSlotName();
+            if (slotName.equals(pref.getString(SmartParkingSharedPreferences.PREF_SLOT_NAME))) {
+                slotLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.yellow));
+                tvSlot.setText(slotName);
             } else {
-                slotLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.red));
+                slotLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.light_gray));
             }
         }
     }
-
-
-
 }
