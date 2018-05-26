@@ -7,7 +7,9 @@ import com.google.gson.Gson;
 import java.util.concurrent.TimeUnit;
 
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
+import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotStatusResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.GetAllSlotsResponse;
+import id.ac.ugm.smartparking.smartparkingapp.model.HistoryResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
@@ -27,7 +29,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.72.9.70:8000/api/";
+    public static final String BASE_URL_API = "http://10.72.58.164:8000/api/";
 //    public static final String BASE_URL_API = "http://10.72.20.21/smartparking/public/api/";
     private NetworkService service;
 
@@ -160,6 +162,41 @@ public class Network {
 
             @Override
             public void onFailure(Call<GetAllSlotsResponse> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void getHistory(final int id_user, final MyCallback<HistoryResponse> callback) {
+        service.getHistory(id_user).enqueue(new Callback<HistoryResponse>() {
+            @Override
+            public void onResponse(Call<HistoryResponse> call, Response<HistoryResponse> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Get History Response Error");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HistoryResponse> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void getSlotStatus(final int id_reservation, final MyCallback<CheckSlotStatusResponse> callback) {
+        service.getSlotStatus(id_reservation).enqueue(new Callback<CheckSlotStatusResponse>() {
+            @Override
+            public void onResponse(Call<CheckSlotStatusResponse> call, Response<CheckSlotStatusResponse> response) {
+                if(response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                }
+                else callback.onError("Get Slot Status Error");
+            }
+
+            @Override
+            public void onFailure(Call<CheckSlotStatusResponse> call, Throwable t) {
                 callback.onError(t.getLocalizedMessage());
             }
         });

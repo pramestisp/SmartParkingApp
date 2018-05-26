@@ -33,7 +33,7 @@
                     android:textSize="24sp"/>
 
                 <TextView
-                    android:id="@+id/tvTime"
+                    android:id="@+id/tvDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
@@ -134,6 +134,14 @@
                         android:textAlignment="viewEnd"
                         android:layout_weight="1"/>
                 </LinearLayout>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="cancel booking"
+                    android:id="@+id/bCancel"
+                    android:background="@color/red"
+                    android:textColor="#FFFF"/>
 
             </LinearLayout>
         </RelativeLayout>

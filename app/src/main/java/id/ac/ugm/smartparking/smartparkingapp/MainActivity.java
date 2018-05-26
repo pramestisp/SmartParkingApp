@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,6 +47,8 @@ import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreference
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+
+    public NumberFormat RpFormat;
 
     private EditText etFromTime;
     private EditText etToTime;
@@ -121,7 +124,7 @@ public class MainActivity extends AppCompatActivity
                 etFromTime = mView.findViewById(R.id.etFromTime);
                 etToTime = mView.findViewById(R.id.etToTime);
 
-                tvTime = mView.findViewById(R.id.tvTime);
+                tvTime = mView.findViewById(R.id.tvDate);
                 tvPrice = mView.findViewById(R.id.tvPrice);
 
                 bCheck = mView.findViewById(R.id.bGetTime);
@@ -296,7 +299,10 @@ public class MainActivity extends AppCompatActivity
         prefManager.setString(SmartParkingSharedPreferences.PREF_SLOT_NAME, slotName);
 
         priceCount();
-        tvPrice.setText("Rp " + price);
+        prefManager.setFloat(SmartParkingSharedPreferences.PREF_PRICE, price);
+        Locale localeID = new Locale("in", "ID");
+        RpFormat = NumberFormat.getCurrencyInstance(localeID);
+        tvPrice.setText(RpFormat.format((double)price));
 
         bViewSlot.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -423,8 +429,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             return;
         }
-
-        prefManager.setFloat(SmartParkingSharedPreferences.PREF_PRICE, price);
+        //why value dari price tidak terupdate????
 
     }
 
@@ -454,8 +459,6 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-
-
         }
 
         if (id == R.id.nav_profile) {
@@ -473,6 +476,11 @@ public class MainActivity extends AppCompatActivity
                         Toast.LENGTH_SHORT).show();
             }
 
+        }
+
+        if (id == R.id.nav_history) {
+            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+            startActivity(intent);
         }
 
         if (id == R.id.nav_logout) {

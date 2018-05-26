@@ -128,12 +128,14 @@ public class RegisterLoginActivity extends AppCompatActivity {
                     Meta meta = response.getMeta();
                     LoginResponse.Data data = response.getData();
 
+                    int user_id = data.getIdUser();
                     profile_name = data.getName();
                     profile_email = data.getEmail();
                     profile_car_type = data.getCarType();
                     profile_car_no = data.getLicensePlateNumber();
                     authToken = meta.getToken();
 
+                    prefManager.setInt(SmartParkingSharedPreferences.PREF_USER_ID, user_id);
                     prefManager.setString(SmartParkingSharedPreferences.PREF_USER_NAME, profile_name);
                     prefManager.setString(SmartParkingSharedPreferences.PREF_EMAIL, profile_email);
                     prefManager.setString(SmartParkingSharedPreferences.PREF_CAR_TYPE, profile_car_type);

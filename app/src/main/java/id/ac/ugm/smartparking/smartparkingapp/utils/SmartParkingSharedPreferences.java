@@ -13,6 +13,7 @@ public class SmartParkingSharedPreferences {
     private static final String PREF_NAME = "id.ac.ugm.smartparking.smartparkingapp";
     public static final String PREF_TOKEN = "token";
     public static final String PREF_USER_NAME = "name";
+    public static final String PREF_USER_ID = "user_id";
     public static final String PREF_EMAIL = "email";
     public static final String PREF_CAR_TYPE = "car_type";
     public static final String PREF_CAR_NO = "car_no";
@@ -20,6 +21,7 @@ public class SmartParkingSharedPreferences {
     public static final String PREF_RESERVED = "reserved";
     public static final String PREF_ARRIVED = "arrived";
     public static final String PREF_ID = "reservation_id";
+    public static final String PREF_SLOT_ID = "slot_id";
     public static final String PREF_SLOT_NAME = "slot_name";
     public static final String PREF_TIME_FROM = "time_from";
     public static final String PREF_TIME_TO = "time_to";
