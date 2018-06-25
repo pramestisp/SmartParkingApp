@@ -75,7 +75,7 @@
         android:text="check"
         android:background="#F57C00"
         android:textColor="#FFFF"
-        android:id="@+id/bGetTime"/>
+        android:id="@+id/bGetTime" />
 
 
     <!--<LinearLayout-->

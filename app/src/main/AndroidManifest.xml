@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -13,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".RegisterLoginActivity"
+        <activity
+            android:name=".RegisterLoginActivity"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,12 +50,19 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity
-            android:name=".ViewSlotActivity" />
+        <activity android:name=".ViewSlotActivity" />
         <activity android:name=".testResult" />
 
         <receiver android:name=".AlarmReceiver" />
 
+        <service
+            android:name=".services.ReminderService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".services.CheckSlotService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

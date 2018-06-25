@@ -30,7 +30,7 @@ public class HistoryResponse {
 		private String slotName;
 
 		@SerializedName("price")
-		private String price;
+		private float price;
 
 		@SerializedName("time")
 		private String time;
@@ -43,11 +43,11 @@ public class HistoryResponse {
 			return slotName;
 		}
 
-		public void setPrice(String price){
+		public void setPrice(float price){
 			this.price = price;
 		}
 
-		public String getPrice(){
+		public float getPrice(){
 			return price;
 		}
 

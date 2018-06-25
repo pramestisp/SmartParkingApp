@@ -43,6 +43,7 @@ import id.ac.ugm.smartparking.smartparkingapp.model.GetAllSlotsResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
+import id.ac.ugm.smartparking.smartparkingapp.services.ReminderService;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 
 public class MainActivity extends AppCompatActivity
@@ -50,10 +51,9 @@ public class MainActivity extends AppCompatActivity
 
     public NumberFormat RpFormat;
 
-    private EditText etFromTime;
-    private EditText etToTime;
+    private EditText etFromTime, etToTime;
 
-    private TextView tvTime,tvPrice, tvName, tvEmail;
+    private TextView tvName, tvEmail;
 
     private Button bCheck;
 
@@ -123,10 +123,6 @@ public class MainActivity extends AppCompatActivity
 
                 etFromTime = mView.findViewById(R.id.etFromTime);
                 etToTime = mView.findViewById(R.id.etToTime);
-
-                tvTime = mView.findViewById(R.id.tvDate);
-                tvPrice = mView.findViewById(R.id.tvPrice);
-
                 bCheck = mView.findViewById(R.id.bGetTime);
 
                 mBuilder.setView(mView);
@@ -147,8 +143,7 @@ public class MainActivity extends AppCompatActivity
                         int hourFrom = c1.get(Calendar.HOUR_OF_DAY);
                         int minuteFrom = c1.get(Calendar.MINUTE);
                         final Date fromTime = c1.getTime();
-
-                        CustomTimePickerDialog fromTimePickerDialog = new CustomTimePickerDialog(MainActivity.this,
+                        TimePickerDialog fromTimePickerDialog = new TimePickerDialog(MainActivity.this,
                                 new CustomTimePickerDialog.OnTimeSetListener() {
                                     @Override
                                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -330,9 +325,12 @@ public class MainActivity extends AppCompatActivity
                                 Toast.LENGTH_SHORT).show();
                         ReservationResponse.Data data = response.getData();
                         int reservation_id = data.getIdUserPark();
+                        boolean arrived = false;
                         prefManager.setBoolean(SmartParkingSharedPreferences.PREF_RESERVED, reserved);
+                        prefManager.setBoolean(SmartParkingSharedPreferences.PREF_ARRIVED, arrived);
                         prefManager.setInt(SmartParkingSharedPreferences.PREF_ID, reservation_id);
                         startActivity(intent);
+                        startService(new Intent(MainActivity.this, ReminderService.class));
                     }
 
                     @Override
@@ -368,7 +366,7 @@ public class MainActivity extends AppCompatActivity
         Log.e("et to time", toTime);
 
 
-        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis < fromMillis) {
+        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis <= fromMillis) {
 
             Toast.makeText(MainActivity.this,
                     "Invalid time",
@@ -429,7 +427,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             return;
         }
-        //why value dari price tidak terupdate????
 
     }
 

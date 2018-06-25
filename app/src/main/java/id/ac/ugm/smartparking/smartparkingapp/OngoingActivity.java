@@ -4,12 +4,18 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Vibrator;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +25,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -26,6 +33,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -33,28 +41,42 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotStatusResponse;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationNewRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
+import id.ac.ugm.smartparking.smartparkingapp.services.ReminderService;
 import id.ac.ugm.smartparking.smartparkingapp.utils.Constants;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
+import okhttp3.ResponseBody;
 
 /**
  * Created by Shindy on 31-Mar-18.
  */
 public class OngoingActivity extends AppCompatActivity {
 
-    TextView tvTimeCountdown, tvTimeRemains, tvSlotNo, tvArrivalTime, tvLeavingTime, tvPrice;
-    Button bQR, bViewSlot;
+    TextView tvTimeCountdown, tvTimeRemains, tvSlotNo, tvArrivalTime, tvLeavingTime, tvPrice, tvSlotNoNew;
+    Button bQR, bViewSlot, bCancel, bYes, bNo, bArrived, bLeft, bCheckSlot;
 
     private Network network;
 
     private SmartParkingSharedPreferences prefManager;
 
-    private long fromTime, toTime, currentTime, timeLeft;
+    private long fromTime, toTime, currentTime, timeLeft, arriveTime, leftTime, parkTime;
+    float price;
+    int idSlot;
     boolean arrived;
-    Intent intentHome;
+    Intent intentHome, intentReminder;
     AlarmManager alarmManager;
     AlertDialog.Builder builder;
+    ProgressDialog loading;
+    CountDownTimer timer;
+    NotificationCompat.Builder mBuilder;
+    PendingIntent pendingIntentReminder, pendingIntentPark, pendingIntentCheck;
+    BroadcastReceiver brReminder, brCheck;
+    Vibrator mVibrator;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,23 +96,70 @@ public class OngoingActivity extends AppCompatActivity {
         tvPrice = findViewById(R.id.tvPrice);
         bQR = findViewById(R.id.bShowQR);
         bViewSlot = findViewById(R.id.bViewSlot);
+        bCancel = findViewById(R.id.bCancelRes);
+        bArrived = findViewById(R.id.bArrived);
+        bLeft = findViewById(R.id.bLeft);
+//        bCheckSlot = findViewById(R.id.bCheckSlot);
+
+        mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+        alarmManager = (AlarmManager)OngoingActivity.this.getSystemService(Context.ALARM_SERVICE);
 
         intentHome = new Intent(OngoingActivity.this, MainActivity.class);
+        intentReminder = new Intent(OngoingActivity.this, ReminderService.class);
 
         getIntent();
 
         builder = new AlertDialog.Builder(OngoingActivity.this);
 
-//        isArrived();
+        loading = new ProgressDialog(this);
 
+        isArrived();
 
         fromTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_FROM);
         toTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_TO);
         currentTime = Calendar.getInstance().getTimeInMillis();
 
-//        timeLeft = fromTime - currentTime;
-        timeLeft = 1000000;
-//        boolean reserved = true;
+        timeLeft = fromTime - currentTime;
+
+        Log.e("fromMillis", String.valueOf(fromTime));
+        Log.e("currentMillis", String.valueOf(currentTime));
+        Log.e("timeLeft/difference", String.valueOf(timeLeft));
+
+        timer = new CountDownTimer(timeLeft, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                timeLeft = millisUntilFinished;
+                updateText();
+                //checkTime();
+                //Alert(millisUntilFinished);
+            }
+
+            @Override
+            public void onFinish() {
+                tvTimeCountdown.setText("Time's up");
+                stopService(intentReminder);
+//                stopReminder();
+                cancelRes();
+                Notifications(getApplicationContext());
+                mBuilder.setContentTitle("Time's up")
+                        .setContentText("Your time is up");
+                mVibrator.vibrate(500);
+            }
+        }.start();
+
+//        checkTime();
+        checkSlot();
+
+//        if(arrived = false) {
+//            //TODO: alarm 15 min dan 00
+////            Timer();
+//
+////        timeLeft = 1000000;
+////        boolean reserved = true;
+//
+//
+//        }
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
         Date dateFrom = new Date(fromTime);
@@ -98,39 +167,26 @@ public class OngoingActivity extends AppCompatActivity {
         Date dateTo = new Date(toTime);
         tvLeavingTime.setText(sdf.format(dateTo));
 
-        float price = prefManager.getFloat(SmartParkingSharedPreferences.PREF_PRICE);
+        price = prefManager.getFloat(SmartParkingSharedPreferences.PREF_PRICE);
         Log.e("price", String.valueOf(price));
         Locale localeID = new Locale("in", "ID");
         NumberFormat RpFormat = NumberFormat.getCurrencyInstance(localeID);
         tvPrice.setText(RpFormat.format((double)price));
         tvSlotNo.setText(prefManager.getString(SmartParkingSharedPreferences.PREF_SLOT_NAME));
 
-        Log.e("fromMillis", String.valueOf(fromTime));
-        Log.e("currentMillis", String.valueOf(currentTime));
-        Log.e("timeLeft/difference", String.valueOf(timeLeft));
+//        Summary();
 
-        final CountDownTimer timer = new CountDownTimer(timeLeft, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                timeLeft = millisUntilFinished;
-                updateText();
-                //Alert(millisUntilFinished);
-            }
 
+
+        bArrived.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFinish() {
-                boolean reserved = false;
-                prefManager.setBoolean(SmartParkingSharedPreferences.PREF_RESERVED, reserved);
-                tvTimeCountdown.setText("Time's up");
-                builder.setMessage("Your reservation is cancelled")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                startActivity(intentHome);
-                            }
-                        }).show();
+            public void onClick(View v) {
+                toggleArrived();
+                stopService(intentReminder);
+//                stopReminder();
+                startAlarm();
             }
-        }.start();
+        });
 
         bQR.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,10 +197,9 @@ public class OngoingActivity extends AppCompatActivity {
                 QRDialog.show();
 
                 ImageView ivQR = mView.findViewById(R.id.ivQR);
-                Button bArrived = mView.findViewById(R.id.bArrived);
 
-//                int id_reservation = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
-                int id_reservation = 123;
+                int id_reservation = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
+//                int id_reservation = 123;
 
                 String textQR = String.valueOf(id_reservation);
                 Log.i("id", textQR);
@@ -158,24 +213,7 @@ public class OngoingActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                if(prefManager.getBoolean(SmartParkingSharedPreferences.PREF_ARRIVED)) {
-                    bArrived.setVisibility(View.GONE);
-                }
 
-                bArrived.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        arrived = true;
-                        prefManager.setBoolean(SmartParkingSharedPreferences.PREF_ARRIVED, arrived);
-                        isArrived();
-                        timer.cancel();
-                        QRDialog.dismiss();
-
-                        //TODO: mulai alarm sampe leaving time + penalti jika lewat dari limit
-                        Log.i("time_to", String.valueOf(toTime));
-                        startAlarm();
-                    }
-                });
             }
         });
 
@@ -187,54 +225,272 @@ public class OngoingActivity extends AppCompatActivity {
             }
         });
 
-        alert();
+        bCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                builder.setMessage("Are you sure?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                cancel();
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .create()
+                        .show();
+
+            }
+        });
 
     }
 
-    private void alert() {
-        if(currentTime == fromTime - 900000) {
-            builder.setMessage("You got 15 minutes left")
-                    .setPositiveButton("OK", null).show();
-            showNotif();
-        }
+    private void Timer() {
+        fromTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_FROM);
+        toTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_TO);
+        currentTime = Calendar.getInstance().getTimeInMillis();
+
+        timeLeft = fromTime - currentTime;
+//        timeLeft = 1000000;
+//        boolean reserved = true;
+
+        Log.e("fromMillis", String.valueOf(fromTime));
+        Log.e("currentMillis", String.valueOf(currentTime));
+        Log.e("timeLeft/difference", String.valueOf(timeLeft));
+
+        timer = new CountDownTimer(timeLeft, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                timeLeft = millisUntilFinished;
+                updateText();
+                //checkTime();
+                //Alert(millisUntilFinished);
+            }
+
+            @Override
+            public void onFinish() {
+                tvTimeCountdown.setText("Time's up");
+//                stopReminder();
+                cancelRes();
+                Notifications(getApplicationContext());
+                mBuilder.setContentTitle("Time's up")
+                        .setContentText("Your time is up");
+                mVibrator.vibrate(500);
+            }
+        }.start();
+    }
+
+    private void cancel() {
+        loading.setMessage("Cancelling");
+        loading.show();
+//        stopReminder();
+        cancelRequest();
+
+    }
+
+    private void cancelRequest() {
+        int params = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
+        network.cancel(params, new Network.MyCallback<ResponseBody>() {
+            @Override
+            public void onSuccess(ResponseBody response) {
+                loading.dismiss();
+                cancelRes();
+            }
+
+            @Override
+            public void onError(String error) {
+                loading.dismiss();
+                Toast.makeText(OngoingActivity.this,
+                        error,
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void cancelRes() {
+        boolean reserved = false;
+        prefManager.setBoolean(SmartParkingSharedPreferences.PREF_RESERVED, reserved);
+        builder.setMessage("Your reservation is cancelled")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(intentHome);
+                    }
+                })
+                .create()
+                .show();
+    }
+    //TODO: Perbaiki alert, cek status slot
+//    private void alert() {
+//            builder.setMessage("You got 15 minutes left")
+//                    .setPositiveButton("OK", null)
+//                    .create()
+//                    .show();
+//    }
+    private void stopReminder() {
+        alarmManager.cancel(pendingIntentReminder);
+        unregisterReceiver(brReminder);
+    }
+
+    private void Unreg() {
+        unregisterReceiver(brReminder);
+        unregisterReceiver(brCheck);
     }
 
     private void startAlarm() {
-
-        alarmManager = (AlarmManager)OngoingActivity.this.getSystemService(Context.ALARM_SERVICE);
         Intent myIntent = new Intent(OngoingActivity.this, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(OngoingActivity.this, 0, myIntent, 0);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, toTime, pendingIntent);
+        pendingIntentPark = PendingIntent.getBroadcast(OngoingActivity.this, 0, myIntent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, toTime - 90000, pendingIntentPark);
     }
 
-    private void Alert(long millis) {
-        //TODO: ini gmn ya biar ga kejang2 // gmn biar ga ilang timernya ketika di-close
-        if (millis == 900000) {
-            int params = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
-//            network.getSlotStatus(params, new Network.MyCallback<CheckSlotStatusResponse>() {
-//                @Override
-//                public void onSuccess(CheckSlotStatusResponse response) {
-//                    if (response.getStatus().equals(Constants.PARKED) ) {
-//
-//                    } else {
-//
-//                    }
-//                }
-//
-//                @Override
-//                public void onError(String error) {
-//
-//                }
-//            });
+    public void Notifications(Context context) {
+        mBuilder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.ic_notifications_black_24dp);
+        NotificationManager notificationManager = (NotificationManager) context
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(0, mBuilder.build());
+    }
+
+    private void checkTime() {
+        pendingIntentReminder = PendingIntent.getBroadcast(this, 0,
+                new Intent("id.ac.ugm.smartparking.smartparkingapp" + fromTime), PendingIntent.FLAG_ONE_SHOT);
+        brReminder = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //checkSlot();
+                Notifications(context);
+                mBuilder.setContentTitle("15 minutes left")
+                        .setContentText("You got 15 minutes left");
+                mVibrator.vibrate(300);
+            }
 
 
-//                    Vibrator mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-//                    mVibrator.vibrate(300);
-            builder.setMessage("You got 15 minutes left")
-                    .setPositiveButton("OK", null).show();
-            showNotif();
-        }
+        };
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, fromTime - 900000, pendingIntentReminder);
+        IntentFilter intentFilter = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp" + fromTime);
 
+        registerReceiver(brReminder, intentFilter);
+    }
+
+    public void checkSlot() {
+        pendingIntentCheck = PendingIntent.getBroadcast(this, 0,
+                new Intent("id.ac.ugm.smartparking.smartparkingapp" + currentTime), PendingIntent.FLAG_ONE_SHOT);
+        brCheck = new BroadcastReceiver() {
+            @Override
+            public void onReceive(final Context context, Intent intent) {
+                int params = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
+                network.getSlotStatus(params, new Network.MyCallback<CheckSlotStatusResponse>() {
+                    @Override
+                    public void onSuccess(CheckSlotStatusResponse response) {
+                        if (response.getStatus() == Constants.PARKED) {
+                            Notifications(context);
+                            mBuilder.setContentTitle("Your slot is not available")
+                                    .setContentText("Please confirm to change selected slot");
+                            builder.setMessage("Your slot is not available")
+                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            loading.show();
+                                            checkSlotRequest();
+                                        }
+                                    })
+                                    .create()
+                                    .show();
+                        }
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Toast.makeText(OngoingActivity.this,
+                                error,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+        };
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, currentTime, pendingIntentCheck);
+        IntentFilter intentFilter = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp" + currentTime);
+
+        registerReceiver(brCheck, intentFilter);
+    }
+
+    private void confirmDialog(final String slotName) {
+        View mView = getLayoutInflater().inflate(R.layout.dialog_confirm_change, null);
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(OngoingActivity.this);
+        mBuilder.setView(mView);
+        AlertDialog confirmDialog = mBuilder.create();
+        confirmDialog.show();
+
+        tvSlotNoNew = mView.findViewById(R.id.tvSlotNo);
+        bYes = mView.findViewById(R.id.bYes);
+        bNo = mView.findViewById(R.id.bNo);
+
+        tvSlotNoNew.setText(slotName);
+        bYes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loading.show();
+                final ReservationNewRequestModel request = new ReservationNewRequestModel(idSlot);
+                network.reservationNew(idSlot, request, new Network.MyCallback<ReservationResponse>() {
+                    @Override
+                    public void onSuccess(ReservationResponse response) {
+                        loading.dismiss();
+                        Toast.makeText(OngoingActivity.this,
+                                "Reservation success",
+                                Toast.LENGTH_SHORT).show();
+                        ReservationResponse.Data data = response.getData();
+                        int reservation_id = data.getIdUserPark();
+                        prefManager.setInt(SmartParkingSharedPreferences.PREF_ID, reservation_id);
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        loading.dismiss();
+                        Toast.makeText(OngoingActivity.this,
+                                error,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
+        });
+    }
+
+//    private void Alert(long millis) {
+
+//            //TODO: if parked, panggil api checkslot, reservasi ulang
+
+//
+//
+////                    Vibrator mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+////                    mVibrator.vibrate(300);
+//            builder.setMessage("You got 15 minutes left")
+//                    .setPositiveButton("OK", null).show();
+//            showNotif();
+//        }
+//
+//    }
+    private void checkSlotRequest() {
+        String params = String.valueOf(fromTime) + "-" + String.valueOf(toTime);
+        network.getSlot(params, new Network.MyCallback<CheckSlotResponse>() {
+            @Override
+            public void onSuccess(CheckSlotResponse response) {
+                loading.dismiss();
+                String slotName = response.data.getSlotName();
+                //tvSlotNo.setText(slotName);
+                idSlot = response.data.getIdSlot();
+                //reserve ulang
+                confirmDialog(slotName);
+            }
+
+            @Override
+            public void onError(String error) {
+                loading.dismiss();
+                Toast.makeText(OngoingActivity.this,
+                        error,
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void updateText() {
@@ -261,19 +517,63 @@ public class OngoingActivity extends AppCompatActivity {
         mBuilder.flags |= Notification.FLAG_AUTO_CANCEL;
         notif.notify(0, mBuilder);
 
+        //yg dibuka ketika notif dipilih
         Intent intent = new Intent(this, OngoingActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent notifyPendingIntent = PendingIntent.getActivity(
-                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-        );
+                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+    }
+
+    private void toggleArrived() {
+        if(bArrived.getVisibility() == View.VISIBLE) {
+            bArrived.setVisibility(View.GONE);
+            tvTimeRemains.setVisibility(View.GONE);
+            tvTimeCountdown.setVisibility(View.GONE);
+            bCancel.setVisibility(View.GONE);
+            bLeft.setVisibility(View.VISIBLE);
+            arrived = true;
+            prefManager.setBoolean(SmartParkingSharedPreferences.PREF_ARRIVED, arrived);
+            timer.cancel();
+            Log.i("time_to", String.valueOf(toTime));
+            startAlarm();
+        } else {
+            bArrived.setVisibility(View.VISIBLE);
+            tvTimeRemains.setVisibility(View.VISIBLE);
+            tvTimeCountdown.setVisibility(View.VISIBLE);
+            bCancel.setVisibility(View.VISIBLE);
+            bLeft.setVisibility(View.GONE);
+            arrived = false;
+            prefManager.setBoolean(SmartParkingSharedPreferences.PREF_ARRIVED, arrived);
+        }
+    }
+
+    private void Summary() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        Date dateFrom = new Date(fromTime);
+        tvArrivalTime.setText(sdf.format(dateFrom));
+        Date dateTo = new Date(toTime);
+        tvLeavingTime.setText(sdf.format(dateTo));
+
+        price = prefManager.getFloat(SmartParkingSharedPreferences.PREF_PRICE);
+        Log.e("price", String.valueOf(price));
+        Locale localeID = new Locale("in", "ID");
+        NumberFormat RpFormat = NumberFormat.getCurrencyInstance(localeID);
+        tvPrice.setText(RpFormat.format((double)price));
+        tvSlotNo.setText(prefManager.getString(SmartParkingSharedPreferences.PREF_SLOT_NAME));
     }
 
     private void isArrived() {
         if(prefManager.getBoolean(SmartParkingSharedPreferences.PREF_ARRIVED)) {
             tvTimeRemains.setVisibility(View.GONE);
             tvTimeCountdown.setVisibility(View.GONE);
-
+            bCancel.setVisibility(View.GONE);
+            bLeft.setVisibility(View.VISIBLE);
+        } else {
+            tvTimeRemains.setVisibility(View.VISIBLE);
+            tvTimeCountdown.setVisibility(View.VISIBLE);
+            bCancel.setVisibility(View.VISIBLE);
+            bLeft.setVisibility(View.GONE);
         }
     }
 

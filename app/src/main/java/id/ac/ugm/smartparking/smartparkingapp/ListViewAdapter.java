@@ -6,7 +6,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import id.ac.ugm.smartparking.smartparkingapp.model.HistoryResponse;
 
@@ -50,9 +52,12 @@ public class ListViewAdapter extends BaseAdapter {
 
         HistoryResponse.DataItem data = historyList.get(position);
 
+        Locale localeID = new Locale("in", "ID");
+        NumberFormat RpFormat = NumberFormat.getCurrencyInstance(localeID);
+
         tvDate.setText(data.getTime());
         tvSlot.setText("Slot: " + data.getSlotName());
-        tvPrice.setText("Rp " + data.getPrice());
+        tvPrice.setText(RpFormat.format(data.getPrice()));
 
         return v;
     }

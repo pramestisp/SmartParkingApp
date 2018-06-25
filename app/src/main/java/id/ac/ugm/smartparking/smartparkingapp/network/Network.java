@@ -13,6 +13,7 @@ import id.ac.ugm.smartparking.smartparkingapp.model.HistoryResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationNewRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import okhttp3.OkHttpClient;
@@ -29,8 +30,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.72.58.164:8000/api/";
-//    public static final String BASE_URL_API = "http://10.72.20.21/smartparking/public/api/";
+    public static final String BASE_URL_API = "http://10.72.40.71:8000/api/";
+//    public static final String BASE_URL_API = "http://192.168.1.3/smartparking-master/public/api/";
     private NetworkService service;
 
     public Network(Context context) {
@@ -118,7 +119,7 @@ public class Network {
                 if (response.isSuccessful()) {
                     callback.onSuccess(response.body());
                 } else {
-                    callback.onError("Something went wrong or there is no available slots");
+                    callback.onError("Please choose another time");
                 }
             }
 
@@ -197,6 +198,41 @@ public class Network {
 
             @Override
             public void onFailure(Call<CheckSlotStatusResponse> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void cancel(final int id_reservation, final MyCallback<ResponseBody> callback) {
+        service.cancel(id_reservation).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                }
+                else callback.onError("Cancel booking failed");
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void reservationNew(final int id_reservation, final ReservationNewRequestModel request, final MyCallback<ReservationResponse> callback){
+        service.reservationNew(id_reservation, request).enqueue(new Callback<ReservationResponse>() {
+            @Override
+            public void onResponse(Call<ReservationResponse> call, Response<ReservationResponse> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Reservation failed");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReservationResponse> call, Throwable t) {
                 callback.onError(t.getLocalizedMessage());
             }
         });

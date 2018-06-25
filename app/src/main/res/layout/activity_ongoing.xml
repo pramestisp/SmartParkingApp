@@ -40,12 +40,29 @@
                     android:textSize="56sp" />
 
                 <Button
+                    android:id="@+id/bArrived"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="i've arrived"/>
+                <Button
+                    android:id="@+id/bLeft"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="i've left"/>
+
+                <Button
                     android:id="@+id/bShowQR"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="show qr code"
                     android:background="#F57C00"
                     android:textColor="#FFFF"/>
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="check slot"
+                    android:id="@+id/bCheckSlot"
+                    />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -139,7 +156,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="cancel booking"
-                    android:id="@+id/bCancel"
+                    android:id="@+id/bCancelRes"
                     android:background="@color/red"
                     android:textColor="#FFFF"/>
 

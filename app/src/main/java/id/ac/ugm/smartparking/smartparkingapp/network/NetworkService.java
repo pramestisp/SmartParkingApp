@@ -7,14 +7,18 @@ import id.ac.ugm.smartparking.smartparkingapp.model.HistoryResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
+import id.ac.ugm.smartparking.smartparkingapp.model.ReservationNewRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 /**
@@ -38,6 +42,7 @@ public interface NetworkService {
     @POST("addreservation")
     Call<ReservationResponse> reservation(@Body ReservationRequestModel request);
 
+    @Headers("Accept: application/json")
     @GET("carparkslot")
     Call<GetAllSlotsResponse> getAllSlot();
 
@@ -46,4 +51,12 @@ public interface NetworkService {
 
     @GET("carparkslot/{id_reservation}")
     Call<CheckSlotStatusResponse> getSlotStatus(@Path("id_reservation") int id_reservation);
+
+    @Headers("Accept: application/json")
+    @DELETE("user/deletereserevation/{id_reservation}")
+    Call<ResponseBody> cancel(@Path("id_reservation") int id_reservation);
+
+    @Headers("Accept: application/json")
+    @PATCH("updatereserevation/{id_reservation}")
+    Call<ReservationResponse> reservationNew(@Path("id_reservation") int id_reservation, @Body ReservationNewRequestModel request);
 }

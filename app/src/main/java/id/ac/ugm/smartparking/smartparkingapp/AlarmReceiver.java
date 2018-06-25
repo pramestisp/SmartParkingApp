@@ -43,7 +43,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         Ringtone ringtone = RingtoneManager.getRingtone(context, alarmUri);
         ringtone.play();
 
-        Toast.makeText(context, "WAKE UP!!!", Toast.LENGTH_LONG).show();
+        //Toast.makeText(context, "WAKE UP!!!", Toast.LENGTH_LONG).show();
 
     }
 }

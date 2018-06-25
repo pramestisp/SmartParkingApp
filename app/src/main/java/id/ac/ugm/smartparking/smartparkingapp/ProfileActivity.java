@@ -1,5 +1,6 @@
 package id.ac.ugm.smartparking.smartparkingapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
@@ -47,5 +48,9 @@ public class ProfileActivity extends AppCompatActivity {
         tvCarType.setText(car_type);
         tvCarNo.setText(car_no);
 
+    }
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(ProfileActivity.this, MainActivity.class));
     }
 }
