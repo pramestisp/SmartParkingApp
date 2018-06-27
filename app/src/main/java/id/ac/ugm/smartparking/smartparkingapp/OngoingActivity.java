@@ -11,11 +11,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Vibrator;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -33,7 +31,6 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -44,10 +41,10 @@ import java.util.concurrent.TimeUnit;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotStatusResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationNewRequestModel;
-import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
-import id.ac.ugm.smartparking.smartparkingapp.services.ReminderService;
+import id.ac.ugm.smartparking.smartparkingapp.services.BookingReminderService;
+import id.ac.ugm.smartparking.smartparkingapp.services.CheckSlotService;
 import id.ac.ugm.smartparking.smartparkingapp.utils.Constants;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 import okhttp3.ResponseBody;
@@ -68,7 +65,7 @@ public class OngoingActivity extends AppCompatActivity {
     float price;
     int idSlot;
     boolean arrived;
-    Intent intentHome, intentReminder;
+    Intent intentHome, intentBookingReminder;
     AlarmManager alarmManager;
     AlertDialog.Builder builder;
     ProgressDialog loading;
@@ -106,7 +103,7 @@ public class OngoingActivity extends AppCompatActivity {
         alarmManager = (AlarmManager)OngoingActivity.this.getSystemService(Context.ALARM_SERVICE);
 
         intentHome = new Intent(OngoingActivity.this, MainActivity.class);
-        intentReminder = new Intent(OngoingActivity.this, ReminderService.class);
+        intentBookingReminder = new Intent(OngoingActivity.this, BookingReminderService.class);
 
         getIntent();
 
@@ -138,13 +135,13 @@ public class OngoingActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 tvTimeCountdown.setText("Time's up");
-                stopService(intentReminder);
+                stopService(intentBookingReminder);
 //                stopReminder();
                 cancelRes();
-                Notifications(getApplicationContext());
-                mBuilder.setContentTitle("Time's up")
-                        .setContentText("Your time is up");
-                mVibrator.vibrate(500);
+//                Notifications(getApplicationContext());
+//                mBuilder.setContentTitle("Time's up")
+//                        .setContentText("Your time is up");
+//                mVibrator.vibrate(500);
             }
         }.start();
 
@@ -182,7 +179,8 @@ public class OngoingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 toggleArrived();
-                stopService(intentReminder);
+                stopService(intentBookingReminder);
+                unregisterReceiver(brCheck);
 //                stopReminder();
                 startAlarm();
             }
@@ -377,41 +375,49 @@ public class OngoingActivity extends AppCompatActivity {
         brCheck = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, Intent intent) {
-                int params = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
-                network.getSlotStatus(params, new Network.MyCallback<CheckSlotStatusResponse>() {
-                    @Override
-                    public void onSuccess(CheckSlotStatusResponse response) {
-                        if (response.getStatus() == Constants.PARKED) {
-                            Notifications(context);
-                            mBuilder.setContentTitle("Your slot is not available")
-                                    .setContentText("Please confirm to change selected slot");
-                            builder.setMessage("Your slot is not available")
-                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            loading.show();
-                                            checkSlotRequest();
-                                        }
-                                    })
-                                    .create()
-                                    .show();
-                        }
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        Toast.makeText(OngoingActivity.this,
-                                error,
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
+                startService(new Intent(OngoingActivity.this, CheckSlotService.class));
+//                int params = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
+//                network.getSlotStatus(params, new Network.MyCallback<CheckSlotStatusResponse>() {
+//                    @Override
+//                    public void onSuccess(CheckSlotStatusResponse response) {
+//                        if (response.getStatus() == Constants.PARKED) {
+//                            Notifications(context);
+//                            mBuilder.setContentTitle("Your slot is not available")
+//                                    .setContentText("Please confirm to change selected slot");
+//                            builder.setMessage("Your slot is not available")
+//                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                                        @Override
+//                                        public void onClick(DialogInterface dialog, int which) {
+//                                            loading.show();
+//                                            checkSlotRequest();
+//                                        }
+//                                    })
+//                                    .create()
+//                                    .show();
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onError(String error) {
+//                        Toast.makeText(OngoingActivity.this,
+//                                error,
+//                                Toast.LENGTH_SHORT).show();
+//                    }
+//                });
             }
 
         };
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, currentTime, pendingIntentCheck);
-        IntentFilter intentFilter = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp" + currentTime);
+
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, fromTime - 900000, 1000 * 60* 5,pendingIntentCheck);
+        IntentFilter intentFilter = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp" + fromTime);
 
         registerReceiver(brCheck, intentFilter);
+    }
+
+    public void Toast(String error) {
+        Toast.makeText(this,
+                error,
+                Toast.LENGTH_SHORT).show();
     }
 
     private void confirmDialog(final String slotName) {
@@ -470,7 +476,7 @@ public class OngoingActivity extends AppCompatActivity {
 //        }
 //
 //    }
-    private void checkSlotRequest() {
+    public void checkSlotRequest() {
         String params = String.valueOf(fromTime) + "-" + String.valueOf(toTime);
         network.getSlot(params, new Network.MyCallback<CheckSlotResponse>() {
             @Override

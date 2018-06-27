@@ -57,12 +57,6 @@
                     android:text="show qr code"
                     android:background="#F57C00"
                     android:textColor="#FFFF"/>
-                <Button
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="check slot"
-                    android:id="@+id/bCheckSlot"
-                    />
 
                 <TextView
                     android:layout_width="match_parent"

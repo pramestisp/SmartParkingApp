@@ -56,11 +56,15 @@
         <receiver android:name=".AlarmReceiver" />
 
         <service
-            android:name=".services.ReminderService"
+            android:name=".services.BookingReminderService"
             android:enabled="true"
             android:exported="true" />
         <service
             android:name=".services.CheckSlotService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".services.ParkReminderService"
             android:enabled="true"
             android:exported="true"></service>
     </application>

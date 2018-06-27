@@ -30,7 +30,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.72.40.71:8000/api/";
+    public static final String BASE_URL_API = "http://10.72.49.74:8000/api/";
 //    public static final String BASE_URL_API = "http://192.168.1.3/smartparking-master/public/api/";
     private NetworkService service;
 

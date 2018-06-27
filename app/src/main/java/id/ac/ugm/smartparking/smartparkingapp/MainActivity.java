@@ -43,7 +43,7 @@ import id.ac.ugm.smartparking.smartparkingapp.model.GetAllSlotsResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
-import id.ac.ugm.smartparking.smartparkingapp.services.ReminderService;
+import id.ac.ugm.smartparking.smartparkingapp.services.BookingReminderService;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 
 public class MainActivity extends AppCompatActivity
@@ -330,7 +330,7 @@ public class MainActivity extends AppCompatActivity
                         prefManager.setBoolean(SmartParkingSharedPreferences.PREF_ARRIVED, arrived);
                         prefManager.setInt(SmartParkingSharedPreferences.PREF_ID, reservation_id);
                         startActivity(intent);
-                        startService(new Intent(MainActivity.this, ReminderService.class));
+                        startService(new Intent(MainActivity.this, BookingReminderService.class));
                     }
 
                     @Override
