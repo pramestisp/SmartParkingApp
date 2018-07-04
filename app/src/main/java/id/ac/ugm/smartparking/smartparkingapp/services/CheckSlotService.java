@@ -7,8 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.widget.Toast;
 
 import id.ac.ugm.smartparking.smartparkingapp.Notif;
@@ -21,18 +23,18 @@ import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreference
 public class CheckSlotService extends Service {
     Network network;
     SmartParkingSharedPreferences prefManager;
-    Context context;
+    BroadcastReceiver broadcastReceiver;
     Notif notif;
     AlertDialog.Builder builder;
     OngoingActivity ongoing;
     AlarmManager alarmManager;
+    long fromTime;
 
     public CheckSlotService() {
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
         return null;
     }
 
@@ -43,11 +45,16 @@ public class CheckSlotService extends Service {
         network = new Network(this);
         ongoing = new OngoingActivity();
         alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        prefManager = new SmartParkingSharedPreferences(this);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+
+        fromTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_FROM);
+        PendingIntent pi = PendingIntent.getBroadcast(this, 0,
+                new Intent("id.ac.ugm.smartparking.smartparkingapp"), PendingIntent.FLAG_ONE_SHOT);
+        broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, Intent intent) {
                 int params = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
@@ -58,7 +65,8 @@ public class CheckSlotService extends Service {
                             notif.updateNotif(context,
                                     "Your slot is occupied by other person",
                                     "Please confirm to change selected slot",
-                                    500);
+                                    500,
+                                    2);
                             builder = new AlertDialog.Builder(context);
 //                    mBuilder.setContentTitle("Your slot is not available")
 //                            .setContentText("Please confirm to change selected slot");
@@ -77,8 +85,9 @@ public class CheckSlotService extends Service {
 
                     @Override
                     public void onError(String error) {
+                        Log.e("get status", String.valueOf(error));
                         //TODO: Toastnya gabisa muncul aku kudu piye???
-                        ongoing.Toast(error);
+//                        ongoing.Toast(error);
 //                Toast.makeText(context,
 //                        error,
 //                        Toast.LENGTH_SHORT).show();
@@ -87,9 +96,19 @@ public class CheckSlotService extends Service {
 
             }
         };
-        PendingIntent pi = PendingIntent.getBroadcast(this, 0, new Intent (this, broadcastReceiver.getClass()),0 );
-        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis(), pi);
+////        PendingIntent pi = PendingIntent.getBroadcast(this, 0, new Intent (this, broadcastReceiver.getClass()),0 );
+//        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis(), pi);
+        alarmManager.setRepeating(AlarmManager.RTC, fromTime - 900000, 60*1000, pi);
+        IntentFilter intentFilter = new IntentFilter("aaaaaaaa");
+        intentFilter.setPriority(100);
+        registerReceiver(broadcastReceiver, intentFilter);
+
 
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onDestroy() {
+        unregisterReceiver(broadcastReceiver);
     }
 }

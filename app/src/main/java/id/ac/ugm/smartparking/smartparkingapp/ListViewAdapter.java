@@ -57,7 +57,7 @@ public class ListViewAdapter extends BaseAdapter {
 
         tvDate.setText(data.getTime());
         tvSlot.setText("Slot: " + data.getSlotName());
-        tvPrice.setText(RpFormat.format(data.getPrice()));
+        tvPrice.setText("- " + RpFormat.format(data.getPrice()));
 
         return v;
     }

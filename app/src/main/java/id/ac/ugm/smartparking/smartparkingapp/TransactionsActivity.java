@@ -6,10 +6,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
+import id.ac.ugm.smartparking.smartparkingapp.model.BalanceResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.HistoryResponse;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
@@ -18,10 +22,12 @@ import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreference
  * Created by Shindy on 21-May-18.
  */
 
-public class HistoryActivity extends AppCompatActivity {
+public class TransactionsActivity extends AppCompatActivity {
     ProgressDialog loading;
     Network network;
     SmartParkingSharedPreferences prefManager;
+    TextView tvBalance;
+    int params;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,32 +44,58 @@ public class HistoryActivity extends AppCompatActivity {
         network = new Network(this);
         prefManager = new SmartParkingSharedPreferences(this);
 
+        tvBalance = findViewById(R.id.tvBalance);
+
+        params = prefManager.getInt(SmartParkingSharedPreferences.PREF_USER_ID);
+
+        loading.setMessage("Loading");
+        loading.show();
+
+        showBalance();
         showHistory();
     }
 
+    private void showBalance() {
+        network.getBalance(params, new Network.MyCallback<BalanceResponse>() {
+            @Override
+            public void onSuccess(BalanceResponse response) {
+                loading.dismiss();
+                BalanceResponse.Data data = response.getData();
+                float balance = data.getBalance();
+                Locale localeID = new Locale("in", "ID");
+                NumberFormat RpFormat = NumberFormat.getCurrencyInstance(localeID);
+                tvBalance.setText(RpFormat.format((double)balance));
+            }
+
+            @Override
+            public void onError(String error) {
+                loading.dismiss();
+                Toast.makeText(TransactionsActivity.this, error, Toast.LENGTH_SHORT).show();
+                tvBalance.setText("Can't get balance");
+            }
+        });
+    }
+
     private void showHistory() {
-        int params = prefManager.getInt(SmartParkingSharedPreferences.PREF_USER_ID);
-        loading.setMessage("Loading");
-        loading.show();
         network.getHistory(params, new Network.MyCallback<HistoryResponse>() {
             @Override
             public void onSuccess(HistoryResponse response) {
                 loading.dismiss();
                 List<HistoryResponse.DataItem> historyList = response.getData();
                 ListView listView = findViewById(R.id.lvHistory);
-                listView.setAdapter(new ListViewAdapter(HistoryActivity.this, historyList));
+                listView.setAdapter(new ListViewAdapter(TransactionsActivity.this, historyList));
             }
 
             @Override
             public void onError(String error) {
                 loading.dismiss();
-                Toast.makeText(HistoryActivity.this, error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(TransactionsActivity.this, error, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     @Override
     public void onBackPressed() {
-        startActivity(new Intent(HistoryActivity.this, MainActivity.class));
+        startActivity(new Intent(TransactionsActivity.this, MainActivity.class));
     }
 }

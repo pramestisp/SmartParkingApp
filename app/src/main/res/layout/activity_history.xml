@@ -8,45 +8,44 @@
         layout="@layout/toolbar">
     </include>
 
-    <!--<RelativeLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentStart="true"-->
-        <!--android:layout_below="@+id/toolbar"-->
-        <!--android:background="@color/colorPrimaryLight"-->
-        <!--android:padding="15dp"-->
-        <!--android:id="@+id/rel_1">-->
-        <!--<TextView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:id="@+id/tvBalanceText"-->
-            <!--android:text="Your balance"-->
-            <!--android:textSize="18sp"-->
-            <!--android:textColor="#000"-->
-            <!--android:textAlignment="center"-->
-            <!--android:paddingBottom="10dp"/>-->
-        <!--<TextView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_below="@id/tvBalanceText"-->
-            <!--android:id="@+id/tvBalance"-->
-            <!--android:text="Rp 50.000"-->
-            <!--android:textSize="32sp"-->
-            <!--android:textColor="#000"-->
-            <!--android:textStyle="bold"-->
-            <!--android:textAlignment="center"/>-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/toolbar"
+        android:background="@color/colorPrimaryLight"
+        android:padding="15dp"
+        android:id="@+id/rel_1">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvBalanceText"
+            android:text="Your balance"
+            android:textSize="18sp"
+            android:textColor="#000"
+            android:textAlignment="center"
+            android:paddingBottom="10dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvBalanceText"
+            android:id="@+id/tvBalance"
+            android:textSize="32sp"
+            android:textColor="#000"
+            android:textStyle="bold"
+            android:textAlignment="center"/>
 
-    <!--</RelativeLayout>-->
+    </RelativeLayout>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:id="@+id/rel_2"
-        android:layout_below="@id/toolbar">
-        <!--<TextView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="TransactHistoryResponsetory"/>-->
+        android:layout_below="@id/rel_1">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="History"/>
     </RelativeLayout>
     <RelativeLayout
         android:layout_width="match_parent"

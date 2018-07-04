@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity
 
     float price;
 
-    int hour, min, bookFee, feePerHour, feePer30Min, idSlot;
+    public int hour, min, bookFee, feePerHour, feePer30Min, idSlot;
 
     String df_string_from, df_string_to, drawer_name, drawer_email;
 
@@ -312,6 +312,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 final ReservationRequestModel request = new ReservationRequestModel(idSlot, df_string_from, df_string_to, price);
+                loading.setMessage("");
                 loading.show();
 
                 final Intent intent = new Intent(v.getContext(), OngoingActivity.class);
@@ -343,6 +344,7 @@ public class MainActivity extends AppCompatActivity
                 });
 
 
+
             }
         });
 
@@ -354,6 +356,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+
 
     private void checkValue() {
         String fromTime = etFromTime.getText().toString();
@@ -397,7 +400,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void timeDiff() {
+    public void timeDiff(long fromMillis, long toMillis) {
         diff = toMillis - fromMillis;
         long diffSec = TimeUnit.MILLISECONDS.toSeconds(diff);
         hour = (int) (diffSec / (60*60));
@@ -415,7 +418,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void priceCount() {
-        timeDiff();
+        timeDiff(fromMillis, toMillis);
 
         bookFee = 10000;
         feePerHour = 3000;
@@ -476,7 +479,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (id == R.id.nav_history) {
-            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+            Intent intent = new Intent(MainActivity.this, TransactionsActivity.class);
             startActivity(intent);
         }
 

@@ -142,22 +142,6 @@
                             android:drawablePadding="5dp"/>
                     </android.support.design.widget.TextInputLayout>
 
-                    <!--Spinner
-                        android:id="@+id/sCarBrand"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:entries="@array/car_brands"
-                        android:prompt="@string/brand_prompt"
-                        android:spinnerMode="dropdown"
-                        android:visibility="gone"/>
-
-                    <Spinner
-                        android:id="@+id/sCarModel"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:spinnerMode="dialog"
-                        android:visibility="gone"/-->
-
                     <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:id="@+id/licenseNoWrapper"
@@ -187,8 +171,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="8dp"
-                        android:id="@+id/tvRegister"
+                        android:id="@+id/tvForgotPW"
                         android:layout_marginTop="20dp"
+                        android:textAlignment="center"
+                        android:text="@string/linkforgot"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:id="@+id/tvRegister"
                         android:textAlignment="center"
                         android:text="Tap here to register"/>
 

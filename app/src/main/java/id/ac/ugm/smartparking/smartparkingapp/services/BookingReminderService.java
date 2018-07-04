@@ -20,11 +20,9 @@ import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreference
 public class BookingReminderService extends Service {
     SmartParkingSharedPreferences prefManager;
     BroadcastReceiver brReminder, brTimeUp;
-    IntentFilter intentFilter;
+    IntentFilter intentFilter1, intentFilter2;
+    PendingIntent pendingIntent1, pendingIntent2;
     AlarmManager alarmManager;
-    Vibrator vibrator;
-    NotificationCompat.Builder builder;
-    NotificationManager notificationManager;
     Notif notif;
     long fromTime;
 
@@ -51,8 +49,10 @@ public class BookingReminderService extends Service {
 
 //        Intent ongoingIntent = new Intent(this, OngoingActivity.class);
 //        PendingIntent piOngoing = PendingIntent.getActivity(this, 0, ongoingIntent, 0);
-        PendingIntent piReminder = PendingIntent.getBroadcast(this, 0,
+        pendingIntent1 = PendingIntent.getBroadcast(this, 0,
                 new Intent("id.ac.ugm.smartparking.smartparkingapp" + fromTime), PendingIntent.FLAG_ONE_SHOT);
+        pendingIntent2 = PendingIntent.getBroadcast(this, 0,
+                new Intent("id.ac.ugm.smartparking.smartparkingapp"), PendingIntent.FLAG_ONE_SHOT);
 //        notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
 
@@ -61,54 +61,40 @@ public class BookingReminderService extends Service {
             @Override
             public void onReceive(Context context, Intent intent) {
                 notif.updateNotif(context,
-                        "15 minutes left",
+                        "Arrival - 15 minutes left",
                         "You got 15 minutes left",
-                        300);
-//                builder = new NotificationCompat.Builder(context);
-//                builder.setSmallIcon(R.drawable.ic_notifications_black_24dp)
-//                        .setContentTitle("15 minutes left")
-//                        .setContentText("You got 15 minutes left");
-//                NotificationManager notificationManager = (NotificationManager) context
-//                        .getSystemService(Context.NOTIFICATION_SERVICE);
-//                notificationManager.notify(0, builder.build());
-//                vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-//                vibrator.vibrate(300);
+                        300,
+                        0);
+//                startService(new Intent(BookingReminderService.this, CheckSlotService.class));
             }
         };
 
         brTimeUp = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //TODO: tes notif baru, kalo berhasil tambahin park reminder
-                //TODO: tambahin service cek slot, set repeating
+                //TODO: tambahin service cek slot, set repeating -> wow kurasa ini terlalu advanced
                 notif.updateNotif(context,
-                        "Time's up",
+                        "Arrival - Time's up",
                         "Your time is up. The booking will be cancelled.",
-                        500);
-//                builder.setSmallIcon(R.drawable.ic_notifications_black_24dp)
-//                        .setContentTitle("Time's up")
-//                        .setContentText("Your time is up. The booking will be cancelled.");
-//                NotificationManager notificationManager = (NotificationManager) context
-//                        .getSystemService(Context.NOTIFICATION_SERVICE);
-//                notificationManager.notify(0, builder.build());
-//
-//                vibrator.vibrate(500);
+                        500,
+                        0);
             }
         };
 
 //        builder.setContentIntent(piOngoing);
 
-//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, fromTime - 900000, piReminder);
-//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, fromTime, piReminder);
-        //TODO: KENAPA CUMA NOTIF TERAKHIR YG MUNCUL???
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() +10000, piReminder);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 20000, piReminder);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, fromTime - 900000, pendingIntent1);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, fromTime, pendingIntent2);
+//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() +10000, pendingIntent1);
+//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 20000, pendingIntent2);
 
-        intentFilter = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp" + fromTime);
-        intentFilter.setPriority(100);
+        intentFilter1 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp" + fromTime);
+        intentFilter1.setPriority(100);
+        intentFilter2 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp");
+        intentFilter2.setPriority(100);
 
-        registerReceiver(brReminder, intentFilter);
-        registerReceiver(brTimeUp, intentFilter);
+        registerReceiver(brReminder, intentFilter1);
+        registerReceiver(brTimeUp, intentFilter2);
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -118,6 +104,7 @@ public class BookingReminderService extends Service {
     public void onDestroy() {
         unregisterReceiver(brReminder);
         unregisterReceiver(brTimeUp);
+//        stopService(new Intent(BookingReminderService.this, CheckSlotService.class));
     }
 
 }

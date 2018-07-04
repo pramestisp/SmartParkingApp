@@ -45,6 +45,7 @@ import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 import id.ac.ugm.smartparking.smartparkingapp.services.BookingReminderService;
 import id.ac.ugm.smartparking.smartparkingapp.services.CheckSlotService;
+import id.ac.ugm.smartparking.smartparkingapp.services.ParkReminderService;
 import id.ac.ugm.smartparking.smartparkingapp.utils.Constants;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 import okhttp3.ResponseBody;
@@ -61,11 +62,11 @@ public class OngoingActivity extends AppCompatActivity {
 
     private SmartParkingSharedPreferences prefManager;
 
-    private long fromTime, toTime, currentTime, timeLeft, arriveTime, leftTime, parkTime;
+    private long fromTime, toTime, currentTime, timeLeft, start, stop, arriveTime, leftTime, parkTime;
     float price;
     int idSlot;
-    boolean arrived;
-    Intent intentHome, intentBookingReminder;
+    boolean arrived, reserved;
+    Intent intentHome, intentBookingReminder, intentParkReminder;
     AlarmManager alarmManager;
     AlertDialog.Builder builder;
     ProgressDialog loading;
@@ -74,6 +75,7 @@ public class OngoingActivity extends AppCompatActivity {
     PendingIntent pendingIntentReminder, pendingIntentPark, pendingIntentCheck;
     BroadcastReceiver brReminder, brCheck;
     Vibrator mVibrator;
+    MainActivity mainActivity;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +85,7 @@ public class OngoingActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        mainActivity = new MainActivity();
         network = new Network(this);
         prefManager = new SmartParkingSharedPreferences(this);
         tvTimeCountdown = findViewById(R.id.tvDate);
@@ -95,7 +98,7 @@ public class OngoingActivity extends AppCompatActivity {
         bViewSlot = findViewById(R.id.bViewSlot);
         bCancel = findViewById(R.id.bCancelRes);
         bArrived = findViewById(R.id.bArrived);
-        bLeft = findViewById(R.id.bLeft);
+//        bLeft = findViewById(R.id.bLeft);
 //        bCheckSlot = findViewById(R.id.bCheckSlot);
 
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -104,6 +107,7 @@ public class OngoingActivity extends AppCompatActivity {
 
         intentHome = new Intent(OngoingActivity.this, MainActivity.class);
         intentBookingReminder = new Intent(OngoingActivity.this, BookingReminderService.class);
+        intentParkReminder = new Intent(OngoingActivity.this, ParkReminderService.class);
 
         getIntent();
 
@@ -112,6 +116,9 @@ public class OngoingActivity extends AppCompatActivity {
         loading = new ProgressDialog(this);
 
         isArrived();
+//        startService(new Intent(OngoingActivity.this, CheckSlotService.class));
+
+//        checkSlot();
 
         fromTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_FROM);
         toTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_TO);
@@ -145,11 +152,59 @@ public class OngoingActivity extends AppCompatActivity {
             }
         }.start();
 
+
+
+        bArrived.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!arrived) {
+                    arrived = true;
+                    prefManager.setBoolean(SmartParkingSharedPreferences.PREF_ARRIVED, arrived);
+                    tvTimeRemains.setVisibility(View.GONE);
+                    tvTimeCountdown.setVisibility(View.GONE);
+                    bCancel.setVisibility(View.GONE);
+                    bArrived.setText("I've left");
+                    stopService(intentBookingReminder);
+                    startService(intentParkReminder);
+                    start = System.currentTimeMillis();
+                } else {
+                    unregisterReceiver(brCheck);
+                    stopService(intentParkReminder);
+                    stop = System.currentTimeMillis();
+                    mainActivity.timeDiff(start, stop);
+                    //TODO: dialog durasi parkir
+                    builder.setMessage("Thank you! You've parked for " + mainActivity.hour + " hours " + mainActivity.min + " minutes")
+                            .setPositiveButton("Back to home", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    reserved = false;
+                                    prefManager.setBoolean(SmartParkingSharedPreferences.PREF_RESERVED, reserved);
+                                    startActivity(intentHome);
+                                }
+                            })
+                            .create()
+                            .show();
+
+
+                }
+//                toggleArrived();
+//                if(arrived) {
+//                    bArrived.setText("I've left");
+//                    stopService(intentBookingReminder);
+//                    startService(intentParkReminder);
+//                }
+
+//                unregisterReceiver(brCheck);
+//                stopReminder();
+//                startAlarm();
+            }
+        });
+
 //        checkTime();
-        checkSlot();
+        //TODO: Check slot terlalu advanced q ta sanggup
+//        checkSlot();
 
 //        if(arrived = false) {
-//            //TODO: alarm 15 min dan 00
 ////            Timer();
 //
 ////        timeLeft = 1000000;
@@ -172,20 +227,6 @@ public class OngoingActivity extends AppCompatActivity {
         tvSlotNo.setText(prefManager.getString(SmartParkingSharedPreferences.PREF_SLOT_NAME));
 
 //        Summary();
-
-
-
-        bArrived.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleArrived();
-                stopService(intentBookingReminder);
-                unregisterReceiver(brCheck);
-//                stopReminder();
-                startAlarm();
-            }
-        });
-
         bQR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -230,6 +271,7 @@ public class OngoingActivity extends AppCompatActivity {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                stopService(intentBookingReminder);
                                 cancel();
                             }
                         })
@@ -305,7 +347,7 @@ public class OngoingActivity extends AppCompatActivity {
     }
 
     private void cancelRes() {
-        boolean reserved = false;
+        reserved = false;
         prefManager.setBoolean(SmartParkingSharedPreferences.PREF_RESERVED, reserved);
         builder.setMessage("Your reservation is cancelled")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -324,15 +366,7 @@ public class OngoingActivity extends AppCompatActivity {
 //                    .create()
 //                    .show();
 //    }
-    private void stopReminder() {
-        alarmManager.cancel(pendingIntentReminder);
-        unregisterReceiver(brReminder);
-    }
 
-    private void Unreg() {
-        unregisterReceiver(brReminder);
-        unregisterReceiver(brCheck);
-    }
 
     private void startAlarm() {
         Intent myIntent = new Intent(OngoingActivity.this, AlarmReceiver.class);
@@ -348,26 +382,6 @@ public class OngoingActivity extends AppCompatActivity {
         notificationManager.notify(0, mBuilder.build());
     }
 
-    private void checkTime() {
-        pendingIntentReminder = PendingIntent.getBroadcast(this, 0,
-                new Intent("id.ac.ugm.smartparking.smartparkingapp" + fromTime), PendingIntent.FLAG_ONE_SHOT);
-        brReminder = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                //checkSlot();
-                Notifications(context);
-                mBuilder.setContentTitle("15 minutes left")
-                        .setContentText("You got 15 minutes left");
-                mVibrator.vibrate(300);
-            }
-
-
-        };
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, fromTime - 900000, pendingIntentReminder);
-        IntentFilter intentFilter = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp" + fromTime);
-
-        registerReceiver(brReminder, intentFilter);
-    }
 
     public void checkSlot() {
         pendingIntentCheck = PendingIntent.getBroadcast(this, 0,
@@ -375,7 +389,7 @@ public class OngoingActivity extends AppCompatActivity {
         brCheck = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, Intent intent) {
-                startService(new Intent(OngoingActivity.this, CheckSlotService.class));
+//                startService(new Intent(OngoingActivity.this, CheckSlotService.class));
 //                int params = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
 //                network.getSlotStatus(params, new Network.MyCallback<CheckSlotStatusResponse>() {
 //                    @Override
@@ -512,24 +526,6 @@ public class OngoingActivity extends AppCompatActivity {
         tvTimeCountdown.setText(timeLeftFormatted);
     }
 
-    private void showNotif() {
-        NotificationManager notif = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_notifications_black_24dp)
-                        .setContentTitle("Time's up!")
-                        .setContentText("Your time is up").build();
-
-        mBuilder.flags |= Notification.FLAG_AUTO_CANCEL;
-        notif.notify(0, mBuilder);
-
-        //yg dibuka ketika notif dipilih
-        Intent intent = new Intent(this, OngoingActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent notifyPendingIntent = PendingIntent.getActivity(
-                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-    }
 
     private void toggleArrived() {
         if(bArrived.getVisibility() == View.VISIBLE) {
@@ -537,18 +533,18 @@ public class OngoingActivity extends AppCompatActivity {
             tvTimeRemains.setVisibility(View.GONE);
             tvTimeCountdown.setVisibility(View.GONE);
             bCancel.setVisibility(View.GONE);
-            bLeft.setVisibility(View.VISIBLE);
+//            bLeft.setVisibility(View.VISIBLE);
             arrived = true;
             prefManager.setBoolean(SmartParkingSharedPreferences.PREF_ARRIVED, arrived);
             timer.cancel();
             Log.i("time_to", String.valueOf(toTime));
-            startAlarm();
+//            startAlarm();
         } else {
             bArrived.setVisibility(View.VISIBLE);
             tvTimeRemains.setVisibility(View.VISIBLE);
             tvTimeCountdown.setVisibility(View.VISIBLE);
             bCancel.setVisibility(View.VISIBLE);
-            bLeft.setVisibility(View.GONE);
+//            bLeft.setVisibility(View.GONE);
             arrived = false;
             prefManager.setBoolean(SmartParkingSharedPreferences.PREF_ARRIVED, arrived);
         }
@@ -574,12 +570,13 @@ public class OngoingActivity extends AppCompatActivity {
             tvTimeRemains.setVisibility(View.GONE);
             tvTimeCountdown.setVisibility(View.GONE);
             bCancel.setVisibility(View.GONE);
-            bLeft.setVisibility(View.VISIBLE);
+            bArrived.setText("I've left");
+//            bLeft.setVisibility(View.VISIBLE);
         } else {
             tvTimeRemains.setVisibility(View.VISIBLE);
             tvTimeCountdown.setVisibility(View.VISIBLE);
             bCancel.setVisibility(View.VISIBLE);
-            bLeft.setVisibility(View.GONE);
+//            bLeft.setVisibility(View.GONE);
         }
     }
 

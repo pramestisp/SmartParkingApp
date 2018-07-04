@@ -6,6 +6,8 @@ import com.google.gson.Gson;
 
 import java.util.concurrent.TimeUnit;
 
+import id.ac.ugm.smartparking.smartparkingapp.R;
+import id.ac.ugm.smartparking.smartparkingapp.model.BalanceResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotStatusResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.GetAllSlotsResponse;
@@ -30,7 +32,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class Network {
-    public static final String BASE_URL_API = "http://10.72.49.74:8000/api/";
+    public static final String BASE_URL_API = "http://10.72.29.87:8000/api/";
 //    public static final String BASE_URL_API = "http://192.168.1.3/smartparking-master/public/api/";
     private NetworkService service;
 
@@ -175,7 +177,7 @@ public class Network {
                 if (response.isSuccessful()) {
                     callback.onSuccess(response.body());
                 } else {
-                    callback.onError("Get History Response Error");
+                    callback.onError("Get History Error");
                 }
             }
 
@@ -233,6 +235,42 @@ public class Network {
 
             @Override
             public void onFailure(Call<ReservationResponse> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void getBalance(final int id_user, final MyCallback<BalanceResponse> callback) {
+        service.getBalance(id_user).enqueue(new Callback<BalanceResponse>() {
+            @Override
+            public void onResponse(Call<BalanceResponse> call, Response<BalanceResponse> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Get balance error");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BalanceResponse> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void balanceCharged(final int id_user, final MyCallback<ResponseBody> callback) {
+        service.balanceCharged(id_user).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Update charge error");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 callback.onError(t.getLocalizedMessage());
             }
         });

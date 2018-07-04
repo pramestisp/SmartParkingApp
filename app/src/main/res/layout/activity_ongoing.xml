@@ -44,11 +44,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="i've arrived"/>
-                <Button
-                    android:id="@+id/bLeft"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="i've left"/>
+                <!--<Button-->
+                    <!--android:id="@+id/bLeft"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="i've left"/>-->
 
                 <Button
                     android:id="@+id/bShowQR"

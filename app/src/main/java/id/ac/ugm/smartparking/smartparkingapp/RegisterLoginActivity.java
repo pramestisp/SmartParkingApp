@@ -7,6 +7,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,7 +36,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
     private TextInputLayout inputLicenseNoContainer;
     private TextInputLayout inputCarTypeContainer;
     private Button loginButton;
-    private TextView toggleButton;
+    private TextView toggleButton, tvForgot;
 
     private ProgressBar progressBar;
 
@@ -70,6 +71,8 @@ public class RegisterLoginActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.bLogin);
         toggleButton = findViewById(R.id.tvRegister);
         progressBar = findViewById(R.id.pbLogin);
+        tvForgot = findViewById(R.id.tvForgotPW);
+        tvForgot.setMovementMethod(LinkMovementMethod.getInstance());
 
         inputEmail.setText("bebek@ayam.com");
         inputPassword.setText("sayaarina");
@@ -218,6 +221,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
             inputNameContainer.setVisibility(View.VISIBLE);
             inputCarTypeContainer.setVisibility(View.VISIBLE);
             inputLicenseNoContainer.setVisibility(View.VISIBLE);
+            tvForgot.setVisibility(View.GONE);
             toggleButton.setText("Back to login");
             loginButton.setText("Register");
             isLogin = false;
@@ -226,6 +230,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
             inputNameContainer.setVisibility(View.GONE);
             inputCarTypeContainer.setVisibility(View.GONE);
             inputLicenseNoContainer.setVisibility(View.GONE);
+            tvForgot.setVisibility(View.VISIBLE);
             toggleButton.setText("Tap here to register");
             loginButton.setText("Login");
             //logo.setVisibility(View.VISIBLE);

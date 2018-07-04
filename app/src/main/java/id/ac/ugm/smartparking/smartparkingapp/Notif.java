@@ -10,14 +10,14 @@ import android.support.v4.app.NotificationCompat;
  */
 
 public class Notif {
-    public void updateNotif(Context context, String title, String text, long vibrate) {
+    public void updateNotif(Context context, String title, String text, long vibrate, int id) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_notifications_black_24dp)
                 .setContentTitle(title)
                 .setContentText(text);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0, builder.build());
+        notificationManager.notify(id, builder.build());
 
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(vibrate);

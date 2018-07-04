@@ -1,5 +1,6 @@
 package id.ac.ugm.smartparking.smartparkingapp.network;
 
+import id.ac.ugm.smartparking.smartparkingapp.model.BalanceResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotStatusResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.GetAllSlotsResponse;
@@ -59,4 +60,12 @@ public interface NetworkService {
     @Headers("Accept: application/json")
     @PATCH("updatereserevation/{id_reservation}")
     Call<ReservationResponse> reservationNew(@Path("id_reservation") int id_reservation, @Body ReservationNewRequestModel request);
+
+    @GET("balance/{id_user}")
+    Call<BalanceResponse> getBalance(@Path("id_user") int id_user);
+
+    @Headers("Accept: application/json")
+    @GET("updatecharge/{id_user}")
+    Call<ResponseBody> balanceCharged(@Path("id_user") int id_user);
+
 }
