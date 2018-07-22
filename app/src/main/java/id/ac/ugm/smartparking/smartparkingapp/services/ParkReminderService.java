@@ -53,9 +53,9 @@ public class ParkReminderService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         toTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_TO);
         pendingIntent1 = PendingIntent.getBroadcast(this, 0,
-                new Intent("id.ac.ugm.smartparking.smartparkingapp" + toTime), PendingIntent.FLAG_ONE_SHOT);
+                new Intent("id.ac.ugm.smartparking.smartparkingapp-park" + toTime), PendingIntent.FLAG_ONE_SHOT);
         pendingIntent2 = PendingIntent.getBroadcast(this, 0,
-                new Intent("id.ac.ugm.smartparking.smartparkingapp"), PendingIntent.FLAG_ONE_SHOT);
+                new Intent("id.ac.ugm.smartparking.smartparkingapp-park"), PendingIntent.FLAG_ONE_SHOT);
 
         brReminder = new BroadcastReceiver() {
             @Override
@@ -116,9 +116,12 @@ public class ParkReminderService extends Service {
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, toTime - 900000, pendingIntent1);
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, toTime, pendingIntent2);
 
-        intentFilter1 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp" + toTime);
+//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 10000, pendingIntent1);
+//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 20000, pendingIntent2);
+
+        intentFilter1 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp-park" + toTime);
         intentFilter1.setPriority(100);
-        intentFilter2 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp");
+        intentFilter2 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp-park");
         intentFilter2.setPriority(100);
 
         registerReceiver(brReminder, intentFilter1);

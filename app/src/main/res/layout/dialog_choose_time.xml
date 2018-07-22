@@ -56,26 +56,26 @@
     <!--android:layout_alignRight="@id/etToTime"/>-->
 
 
-    <TextView
-        android:id="@+id/tvDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="18sp"/>
-    <TextView
-        android:id="@+id/tvPrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="18sp"/>
+    <!--<TextView-->
+        <!--android:id="@+id/tvDate"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:textStyle="bold"-->
+        <!--android:textSize="18sp"/>-->
+    <!--<TextView-->
+        <!--android:id="@+id/tvPrice"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:textStyle="bold"-->
+        <!--android:textSize="18sp"/>-->
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="check"
-        android:background="#F57C00"
-        android:textColor="#FFFF"
-        android:id="@+id/bGetTime" />
+        style="@style/YellowButton"
+        android:id="@+id/bGetTime"
+        android:layout_marginTop="10dp"/>
 
 
     <!--<LinearLayout-->

@@ -29,7 +29,7 @@ import retrofit2.http.Path;
 public interface NetworkService {
 
     @Headers("Accept: application/json")
-    @POST("auth/user/register")
+    @POST("auth/user/register-user")
     Call<ResponseBody> register(@Body RegisterRequestModel request);
 
     @Headers("Accept: application/json")
@@ -40,7 +40,7 @@ public interface NetworkService {
     Call<CheckSlotResponse> getSlot(@Path("hour") String hour);
 
     @Headers("Accept: application/json")
-    @POST("addreservation")
+    @POST("reservation/add")
     Call<ReservationResponse> reservation(@Body ReservationRequestModel request);
 
     @Headers("Accept: application/json")
@@ -54,18 +54,14 @@ public interface NetworkService {
     Call<CheckSlotStatusResponse> getSlotStatus(@Path("id_reservation") int id_reservation);
 
     @Headers("Accept: application/json")
-    @DELETE("user/deletereserevation/{id_reservation}")
+    @DELETE("reservation/cancel/{id_reservation}")
     Call<ResponseBody> cancel(@Path("id_reservation") int id_reservation);
-
-    @Headers("Accept: application/json")
-    @PATCH("updatereserevation/{id_reservation}")
-    Call<ReservationResponse> reservationNew(@Path("id_reservation") int id_reservation, @Body ReservationNewRequestModel request);
 
     @GET("balance/{id_user}")
     Call<BalanceResponse> getBalance(@Path("id_user") int id_user);
 
     @Headers("Accept: application/json")
-    @GET("updatecharge/{id_user}")
+    @GET("balance/updatecharge/{id_user}")
     Call<ResponseBody> balanceCharged(@Path("id_user") int id_user);
 
 }

@@ -44,12 +44,15 @@
 
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp">
 
                     <ImageView
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:id="@+id/login_logo"/>
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_centerInParent="true"
+                        android:id="@+id/login_logo"
+                        android:src="@drawable/parkys"/>
 
                 </RelativeLayout>
 
@@ -57,7 +60,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:layout_marginTop="5dp">
 
                     <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
@@ -164,8 +168,7 @@
                         android:layout_marginTop="4dp"
                         android:text="Login"
                         android:id="@+id/bLogin"
-                        android:background="@color/colorPrimaryDark"
-                        android:textColor="#FFF"/>
+                        style="@style/BlueButton"/>
 
                     <TextView
                         android:layout_width="match_parent"

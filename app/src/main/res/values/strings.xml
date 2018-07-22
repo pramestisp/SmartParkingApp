@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SmartParkingApp</string>
 
-    <string name="linkforgot"><a href="http://10.72.29.87:8000/password/reset">Forgot password?</a></string>
+    <string name="linkforgot"><a href="http://smartagriculture.wg.ugm.ac.id/password/reset">Forgot password?</a></string>
 
     <string name="title_activity_main">Home</string>
 

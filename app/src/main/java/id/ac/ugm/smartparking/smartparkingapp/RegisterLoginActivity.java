@@ -118,6 +118,13 @@ public class RegisterLoginActivity extends AppCompatActivity {
             loading.dismiss();
         }
 
+        else if (!email.matches("[a-zA-Z0-9._-]+@[a-z]+.[a-z]+")) {
+            Toast.makeText(RegisterLoginActivity.this,
+                    "Invalid email format",
+                    Toast.LENGTH_SHORT).show();
+            loading.dismiss();
+        }
+
         else {
             final LoginRequestModel request = new LoginRequestModel(email, password);
 
@@ -176,8 +183,16 @@ public class RegisterLoginActivity extends AppCompatActivity {
                     "Please check again",
                     Toast.LENGTH_SHORT).show();
             loading.dismiss();
+        }
 
-        } else {
+        else if (!email.matches("[a-zA-Z0-9._-]+@[a-z]+.[a-z]+")) {
+            Toast.makeText(RegisterLoginActivity.this,
+                    "Email format is invalid",
+                    Toast.LENGTH_SHORT).show();
+            loading.dismiss();
+        }
+
+        else {
             final RegisterRequestModel request = new RegisterRequestModel(name, email, password, car_type, license_no);
 
             network.Register(request, new Network.MyCallback<String>() {
@@ -247,6 +262,13 @@ public class RegisterLoginActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent close = new Intent(Intent.ACTION_MAIN);
+        close.addCategory(Intent.CATEGORY_HOME);
+        close.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(close);
+    }
 }
 
 

@@ -45,6 +45,7 @@ import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 import id.ac.ugm.smartparking.smartparkingapp.services.BookingReminderService;
 import id.ac.ugm.smartparking.smartparkingapp.services.CheckSlotService;
+import id.ac.ugm.smartparking.smartparkingapp.services.CheckTimeService;
 import id.ac.ugm.smartparking.smartparkingapp.services.ParkReminderService;
 import id.ac.ugm.smartparking.smartparkingapp.utils.Constants;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
@@ -64,9 +65,9 @@ public class OngoingActivity extends AppCompatActivity {
 
     private long fromTime, toTime, currentTime, timeLeft, start, stop, arriveTime, leftTime, parkTime;
     float price;
-    int idSlot;
+    int idSlot, hour, min;
     boolean arrived, reserved;
-    Intent intentHome, intentBookingReminder, intentParkReminder;
+    Intent intentHome, intentBookingReminder, intentParkReminder, intentCheckSlot;
     AlarmManager alarmManager;
     AlertDialog.Builder builder;
     ProgressDialog loading;
@@ -94,7 +95,7 @@ public class OngoingActivity extends AppCompatActivity {
         tvArrivalTime = findViewById(R.id.tvArrivalTime);
         tvLeavingTime = findViewById(R.id.tvLeavingTime);
         tvPrice = findViewById(R.id.tvPrice);
-        bQR = findViewById(R.id.bShowQR);
+//        bQR = findViewById(R.id.bShowQR);
         bViewSlot = findViewById(R.id.bViewSlot);
         bCancel = findViewById(R.id.bCancelRes);
         bArrived = findViewById(R.id.bArrived);
@@ -108,6 +109,7 @@ public class OngoingActivity extends AppCompatActivity {
         intentHome = new Intent(OngoingActivity.this, MainActivity.class);
         intentBookingReminder = new Intent(OngoingActivity.this, BookingReminderService.class);
         intentParkReminder = new Intent(OngoingActivity.this, ParkReminderService.class);
+        intentCheckSlot = new Intent(OngoingActivity.this, CheckTimeService.class);
 
         getIntent();
 
@@ -166,15 +168,17 @@ public class OngoingActivity extends AppCompatActivity {
                     bArrived.setText("I've left");
                     stopService(intentBookingReminder);
                     startService(intentParkReminder);
+//                    startService(intentCheckSlot);
                     start = System.currentTimeMillis();
                 } else {
                     unregisterReceiver(brCheck);
                     stopService(intentParkReminder);
                     stop = System.currentTimeMillis();
-                    mainActivity.timeDiff(start, stop);
+                    countTime(start, stop);
+//                    mainActivity.timeDiff(start, stop);
                     //TODO: dialog durasi parkir
-                    builder.setMessage("Thank you! You've parked for " + mainActivity.hour + " hours " + mainActivity.min + " minutes")
-                            .setPositiveButton("Back to home", new DialogInterface.OnClickListener() {
+                    builder.setMessage("Thank you! You've parked for " + hour + " hours " + min + " minutes")
+                            .setNeutralButton("Back to home", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     reserved = false;
@@ -182,6 +186,7 @@ public class OngoingActivity extends AppCompatActivity {
                                     startActivity(intentHome);
                                 }
                             })
+//                            .setNegativeButton(null, null)
                             .create()
                             .show();
 
@@ -199,6 +204,8 @@ public class OngoingActivity extends AppCompatActivity {
 //                startAlarm();
             }
         });
+
+
 
 //        checkTime();
         //TODO: Check slot terlalu advanced q ta sanggup
@@ -227,34 +234,34 @@ public class OngoingActivity extends AppCompatActivity {
         tvSlotNo.setText(prefManager.getString(SmartParkingSharedPreferences.PREF_SLOT_NAME));
 
 //        Summary();
-        bQR.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                View mView = getLayoutInflater().inflate(R.layout.dialog_qr_code, null);
-                builder.setView(mView);
-                final AlertDialog QRDialog = builder.create();
-                QRDialog.show();
-
-                ImageView ivQR = mView.findViewById(R.id.ivQR);
-
-                int id_reservation = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
-//                int id_reservation = 123;
-
-                String textQR = String.valueOf(id_reservation);
-                Log.i("id", textQR);
-                MultiFormatWriter mfw = new MultiFormatWriter();
-                try {
-                    BitMatrix bm = mfw.encode(textQR, BarcodeFormat.QR_CODE, 500, 500);
-                    BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                    Bitmap bitmap = barcodeEncoder.createBitmap(bm);
-                    ivQR.setImageBitmap(bitmap);
-                } catch (WriterException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-        });
+//        bQR.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                View mView = getLayoutInflater().inflate(R.layout.dialog_qr_code, null);
+//                builder.setView(mView);
+//                final AlertDialog QRDialog = builder.create();
+//                QRDialog.show();
+//
+//                ImageView ivQR = mView.findViewById(R.id.ivQR);
+//
+//                int id_reservation = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
+////                int id_reservation = 123;
+//
+//                String textQR = String.valueOf(id_reservation);
+//                Log.i("id", textQR);
+//                MultiFormatWriter mfw = new MultiFormatWriter();
+//                try {
+//                    BitMatrix bm = mfw.encode(textQR, BarcodeFormat.QR_CODE, 500, 500);
+//                    BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+//                    Bitmap bitmap = barcodeEncoder.createBitmap(bm);
+//                    ivQR.setImageBitmap(bitmap);
+//                } catch (WriterException e) {
+//                    e.printStackTrace();
+//                }
+//
+//
+//            }
+//        });
 
         bViewSlot.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -284,40 +291,16 @@ public class OngoingActivity extends AppCompatActivity {
 
     }
 
-    private void Timer() {
-        fromTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_FROM);
-        toTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_TO);
-        currentTime = Calendar.getInstance().getTimeInMillis();
-
-        timeLeft = fromTime - currentTime;
-//        timeLeft = 1000000;
-//        boolean reserved = true;
-
-        Log.e("fromMillis", String.valueOf(fromTime));
-        Log.e("currentMillis", String.valueOf(currentTime));
-        Log.e("timeLeft/difference", String.valueOf(timeLeft));
-
-        timer = new CountDownTimer(timeLeft, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                timeLeft = millisUntilFinished;
-                updateText();
-                //checkTime();
-                //Alert(millisUntilFinished);
-            }
-
-            @Override
-            public void onFinish() {
-                tvTimeCountdown.setText("Time's up");
-//                stopReminder();
-                cancelRes();
-                Notifications(getApplicationContext());
-                mBuilder.setContentTitle("Time's up")
-                        .setContentText("Your time is up");
-                mVibrator.vibrate(500);
-            }
-        }.start();
+    private void countTime(long start, long stop) {
+        long diff = stop - start;
+        long diffSec = TimeUnit.MILLISECONDS.toSeconds(diff);
+        hour = (int) (diffSec / (60*60));
+        int minremaining = (int) (diffSec % (60 * 60));
+        min = (int) (minremaining / 60);
+        int secondsRemaining = (int) (minremaining % (60));
     }
+
+
 
     private void cancel() {
         loading.setMessage("Cancelling");
@@ -349,13 +332,21 @@ public class OngoingActivity extends AppCompatActivity {
     private void cancelRes() {
         reserved = false;
         prefManager.setBoolean(SmartParkingSharedPreferences.PREF_RESERVED, reserved);
-        builder.setMessage("Your reservation is cancelled")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(OngoingActivity.this);
+        mBuilder.setMessage("Your reservation is cancelled")
+                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         startActivity(intentHome);
                     }
                 })
+//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        startActivity(intentHome);
+//                    }
+//                })
+//                .setNegativeButton(null, null)
                 .create()
                 .show();
     }
@@ -368,11 +359,6 @@ public class OngoingActivity extends AppCompatActivity {
 //    }
 
 
-    private void startAlarm() {
-        Intent myIntent = new Intent(OngoingActivity.this, AlarmReceiver.class);
-        pendingIntentPark = PendingIntent.getBroadcast(OngoingActivity.this, 0, myIntent, 0);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, toTime - 90000, pendingIntentPark);
-    }
 
     public void Notifications(Context context) {
         mBuilder = new NotificationCompat.Builder(context)
@@ -428,11 +414,6 @@ public class OngoingActivity extends AppCompatActivity {
         registerReceiver(brCheck, intentFilter);
     }
 
-    public void Toast(String error) {
-        Toast.makeText(this,
-                error,
-                Toast.LENGTH_SHORT).show();
-    }
 
     private void confirmDialog(final String slotName) {
         View mView = getLayoutInflater().inflate(R.layout.dialog_confirm_change, null);
@@ -446,34 +427,34 @@ public class OngoingActivity extends AppCompatActivity {
         bNo = mView.findViewById(R.id.bNo);
 
         tvSlotNoNew.setText(slotName);
-        bYes.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loading.show();
-                final ReservationNewRequestModel request = new ReservationNewRequestModel(idSlot);
-                network.reservationNew(idSlot, request, new Network.MyCallback<ReservationResponse>() {
-                    @Override
-                    public void onSuccess(ReservationResponse response) {
-                        loading.dismiss();
-                        Toast.makeText(OngoingActivity.this,
-                                "Reservation success",
-                                Toast.LENGTH_SHORT).show();
-                        ReservationResponse.Data data = response.getData();
-                        int reservation_id = data.getIdUserPark();
-                        prefManager.setInt(SmartParkingSharedPreferences.PREF_ID, reservation_id);
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        loading.dismiss();
-                        Toast.makeText(OngoingActivity.this,
-                                error,
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-            }
-        });
+//        bYes.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                loading.show();
+//                final ReservationNewRequestModel request = new ReservationNewRequestModel(idSlot);
+//                network.reservationNew(idSlot, request, new Network.MyCallback<ReservationResponse>() {
+//                    @Override
+//                    public void onSuccess(ReservationResponse response) {
+//                        loading.dismiss();
+//                        Toast.makeText(OngoingActivity.this,
+//                                "Reservation success",
+//                                Toast.LENGTH_SHORT).show();
+//                        ReservationResponse.Data data = response.getData();
+//                        int reservation_id = data.getIdUserPark();
+//                        prefManager.setInt(SmartParkingSharedPreferences.PREF_ID, reservation_id);
+//                    }
+//
+//                    @Override
+//                    public void onError(String error) {
+//                        loading.dismiss();
+//                        Toast.makeText(OngoingActivity.this,
+//                                error,
+//                                Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//
+//            }
+//        });
     }
 
 //    private void Alert(long millis) {

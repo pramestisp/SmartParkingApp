@@ -39,8 +39,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Book A Slot"
-                android:background="#F57C00"
-                android:textColor="#FFFF"/>
+                android:background="@color/colorAccent"
+                android:textColor="#000"/>
 
         </LinearLayout>
 

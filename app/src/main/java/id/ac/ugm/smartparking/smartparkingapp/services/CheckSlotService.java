@@ -53,7 +53,7 @@ public class CheckSlotService extends Service {
 
         fromTime = prefManager.getLong(SmartParkingSharedPreferences.PREF_TIME_FROM);
         PendingIntent pi = PendingIntent.getBroadcast(this, 0,
-                new Intent("id.ac.ugm.smartparking.smartparkingapp"), PendingIntent.FLAG_ONE_SHOT);
+                new Intent("id.ac.ugm.smartparking.smartparkingapp-check slot"), PendingIntent.FLAG_ONE_SHOT);
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, Intent intent) {
@@ -99,7 +99,7 @@ public class CheckSlotService extends Service {
 ////        PendingIntent pi = PendingIntent.getBroadcast(this, 0, new Intent (this, broadcastReceiver.getClass()),0 );
 //        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis(), pi);
         alarmManager.setRepeating(AlarmManager.RTC, fromTime - 900000, 60*1000, pi);
-        IntentFilter intentFilter = new IntentFilter("aaaaaaaa");
+        IntentFilter intentFilter = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp-check slot");
         intentFilter.setPriority(100);
         registerReceiver(broadcastReceiver, intentFilter);
 

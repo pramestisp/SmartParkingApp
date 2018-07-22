@@ -1,7 +1,9 @@
 package id.ac.ugm.smartparking.smartparkingapp;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +15,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -28,7 +31,9 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -59,17 +64,19 @@ public class MainActivity extends AppCompatActivity
 
     private Network network;
 
-    private AlertDialog.Builder mBuilder;
+    private AlertDialog.Builder mBuilder, builder;
 
     long fromMillis, toMillis, diff;
 
-    float price;
+    float price, time;
 
-    public int hour, min, bookFee, feePerHour, feePer30Min, idSlot;
+    public int hour, min, millis, bookFee, feePerHour, feePer30Min, idSlot;
 
     String df_string_from, df_string_to, drawer_name, drawer_email;
 
-    AlertDialog timeDialog, confirmDialog;
+//    AlertDialog timeDialog, confirmDialog;
+
+    Dialog timeDialog, confirmDialog;
 
     ProgressDialog loading;
 
@@ -119,7 +126,7 @@ public class MainActivity extends AppCompatActivity
 
         bBook.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                View mView = getLayoutInflater().inflate(R.layout.dialog_choose_time, null);
+                View mView = getLayoutInflater().inflate(R.layout.dialog_choose_time, null, false);
 
                 etFromTime = mView.findViewById(R.id.etFromTime);
                 etToTime = mView.findViewById(R.id.etToTime);
@@ -143,7 +150,7 @@ public class MainActivity extends AppCompatActivity
                         int hourFrom = c1.get(Calendar.HOUR_OF_DAY);
                         int minuteFrom = c1.get(Calendar.MINUTE);
                         final Date fromTime = c1.getTime();
-                        TimePickerDialog fromTimePickerDialog = new TimePickerDialog(MainActivity.this,
+                        CustomTimePickerDialog fromTimePickerDialog = new CustomTimePickerDialog(MainActivity.this,
                                 new CustomTimePickerDialog.OnTimeSetListener() {
                                     @Override
                                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -166,7 +173,7 @@ public class MainActivity extends AppCompatActivity
 
                                         etFromTime.setText(df_string_from);
                                     }
-                                }, hourFrom +2, minuteFrom, true);
+                                }, hourFrom, minuteFrom, true);
                         fromTimePickerDialog.show();
                     }
                 });
@@ -201,10 +208,11 @@ public class MainActivity extends AppCompatActivity
                                 etToTime.setText(df_string_to);
 
                             }
-                        }, hourTo +2, minuteTo, true);
+                        }, hourTo, minuteTo, true);
                         toTimePickerDialog.show();
                     }
                 });
+
             }
 
         });
@@ -238,40 +246,10 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
             }
         });
-//        network.getAllSlot(new Network.MyCallback<GetAllSlotsResponse>() {
-//            @Override
-//            public void onSuccess(GetAllSlotsResponse response) {
-//                loading.dismiss();
-//                List<CheckSlot> slotList = response.data;
-//                if (slotList.get(0).getStatus().equals(Constants.AVAILABLE)) {
-//                    slot_1.setBackgroundResource(R.color.green);
-//                } else {
-//                    slot_1.setBackgroundResource(R.color.red);
-//                }
-//
-//                if (slotList.get(1).getStatus().equals(Constants.AVAILABLE)) {
-//                    slot_2.setBackgroundResource(R.color.green);
-//                } else {
-//                    slot_2.setBackgroundResource(R.color.red);
-//                }
-//
-//                if (slotList.get(2).getStatus().equals(Constants.AVAILABLE)) {
-//                    slot_3.setBackgroundResource(R.color.green);
-//                } else {
-//                    slot_3.setBackgroundResource(R.color.red);
-//                }
-//            }
-//
-//            @Override
-//            public void onError(String error) {
-//                Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
-//                loading.dismiss();
-//            }
-//        });
     }
 
     private void confirmDialog(String slotName) {
-        View mView = getLayoutInflater().inflate(R.layout.dialog_confirm, null);
+        View mView = getLayoutInflater().inflate(R.layout.dialog_confirm, null, false);
 
         mBuilder.setView(mView);
         mBuilder.setCancelable(false);
@@ -286,7 +264,6 @@ public class MainActivity extends AppCompatActivity
         Button bViewSlot = mView.findViewById(R.id.bViewSlot);
         Button bConfirm = mView.findViewById(R.id.bConfirm);
         Button bCancel = mView.findViewById(R.id.bCancel);
-
 
         tvFromTime.setText(df_string_from);
         tvToTime.setText(df_string_to);
@@ -369,7 +346,7 @@ public class MainActivity extends AppCompatActivity
         Log.e("et to time", toTime);
 
 
-        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis <= fromMillis) {
+        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis <= fromMillis || fromMillis < (System.currentTimeMillis() + 1800000)) {
 
             Toast.makeText(MainActivity.this,
                     "Invalid time",
@@ -418,18 +395,29 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void priceCount() {
-        timeDiff(fromMillis, toMillis);
+//        timeDiff(fromMillis, toMillis);
+        //TODO: fix price
+        diff = toMillis - fromMillis;
 
+        millis = 3600000;
         bookFee = 10000;
         feePerHour = 3000;
-        feePer30Min = 2000;
-        price = bookFee + (hour * feePerHour);
+//        price = bookFee + (hour * feePerHour);
+        time = (float) diff / millis;
+        BigDecimal bd = new BigDecimal(time);
+        bd = bd.setScale(1, BigDecimal.ROUND_HALF_UP);
+        price = bookFee + (bd.floatValue() * feePerHour);
+        Log.e("diff", String.valueOf(diff));
+        Log.e("time", String.valueOf(diff/millis));
+        Log.e("bd", String.valueOf(bd));
+        Log.e("price", String.valueOf(bd.floatValue()*feePerHour));
+        Log.e("finalprice", String.valueOf(price));
 
-        if(min == 30) {
-            price += feePer30Min;
-        } else {
-            return;
-        }
+//        if(min == 30) {
+//            price += feePer30Min;
+//        } else {
+//            return;
+//        }
 
     }
 
@@ -448,6 +436,21 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_action_bar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_refresh) {
+            checkCarParkSlot();
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -484,7 +487,9 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (id == R.id.nav_logout) {
-            mBuilder.setMessage("Are you sure?")
+            builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setCancelable(false)
+                    .setMessage("Are you sure?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -494,8 +499,9 @@ public class MainActivity extends AppCompatActivity
                             startActivity(intentLogin);
                         }
                     })
-                    .setNegativeButton("No", null)
-                    .show();
+                    .setNegativeButton("No", null);
+            builder.create();
+            builder.show();
         }
 
         if(fragment != null) {

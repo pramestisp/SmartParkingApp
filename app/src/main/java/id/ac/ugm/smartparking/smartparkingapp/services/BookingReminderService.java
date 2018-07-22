@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import id.ac.ugm.smartparking.smartparkingapp.Notif;
 import id.ac.ugm.smartparking.smartparkingapp.OngoingActivity;
@@ -50,9 +51,9 @@ public class BookingReminderService extends Service {
 //        Intent ongoingIntent = new Intent(this, OngoingActivity.class);
 //        PendingIntent piOngoing = PendingIntent.getActivity(this, 0, ongoingIntent, 0);
         pendingIntent1 = PendingIntent.getBroadcast(this, 0,
-                new Intent("id.ac.ugm.smartparking.smartparkingapp" + fromTime), PendingIntent.FLAG_ONE_SHOT);
+                new Intent("id.ac.ugm.smartparking.smartparkingapp-book" + fromTime), PendingIntent.FLAG_ONE_SHOT);
         pendingIntent2 = PendingIntent.getBroadcast(this, 0,
-                new Intent("id.ac.ugm.smartparking.smartparkingapp"), PendingIntent.FLAG_ONE_SHOT);
+                new Intent("id.ac.ugm.smartparking.smartparkingapp-book"), PendingIntent.FLAG_ONE_SHOT);
 //        notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
 
@@ -65,6 +66,8 @@ public class BookingReminderService extends Service {
                         "You got 15 minutes left",
                         300,
                         0);
+
+                Log.e("15 minutes", "15 minutes");
 //                startService(new Intent(BookingReminderService.this, CheckSlotService.class));
             }
         };
@@ -78,6 +81,8 @@ public class BookingReminderService extends Service {
                         "Your time is up. The booking will be cancelled.",
                         500,
                         0);
+
+                Log.e("time's up", "time's up");
             }
         };
 
@@ -88,9 +93,9 @@ public class BookingReminderService extends Service {
 //        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() +10000, pendingIntent1);
 //        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 20000, pendingIntent2);
 
-        intentFilter1 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp" + fromTime);
+        intentFilter1 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp-book" + fromTime);
         intentFilter1.setPriority(100);
-        intentFilter2 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp");
+        intentFilter2 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp-book");
         intentFilter2.setPriority(100);
 
         registerReceiver(brReminder, intentFilter1);
