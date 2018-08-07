@@ -23,6 +23,11 @@ public class ReservationRequestModel {
         this.price = price;
     }
 
+    public ReservationRequestModel(int idSlot) {
+        this.idSlot = idSlot;
+    }
+
+
     public int getIdSlot() {
         return idSlot;
     }
@@ -55,3 +60,4 @@ public class ReservationRequestModel {
         this.price = price;
     }
 }
+

@@ -21,10 +21,10 @@ public class SmartParkingSharedPreferences {
     public static final String PREF_RESERVED = "reserved";
     public static final String PREF_ARRIVED = "arrived";
     public static final String PREF_ID = "reservation_id";
-    public static final String PREF_SLOT_ID = "slot_id";
     public static final String PREF_SLOT_NAME = "slot_name";
     public static final String PREF_TIME_FROM = "time_from";
     public static final String PREF_TIME_TO = "time_to";
+    public static final String PREF_TIME_START = "time_start";
     public static final String PREF_PRICE = "price";
 
     public SmartParkingSharedPreferences(Context context) {

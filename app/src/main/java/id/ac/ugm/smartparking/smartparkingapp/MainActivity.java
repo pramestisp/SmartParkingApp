@@ -3,7 +3,6 @@ package id.ac.ugm.smartparking.smartparkingapp;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,7 +32,6 @@ import android.widget.Toast;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -126,92 +124,99 @@ public class MainActivity extends AppCompatActivity
 
         bBook.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                View mView = getLayoutInflater().inflate(R.layout.dialog_choose_time, null, false);
+                if(prefManager.getBoolean(SmartParkingSharedPreferences.PREF_RESERVED)) {
+                    Toast.makeText(MainActivity.this,
+                            "You have an ongoing reservation",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    View mView = getLayoutInflater().inflate(R.layout.dialog_choose_time, null, false);
 
-                etFromTime = mView.findViewById(R.id.etFromTime);
-                etToTime = mView.findViewById(R.id.etToTime);
-                bCheck = mView.findViewById(R.id.bGetTime);
+                    etFromTime = mView.findViewById(R.id.etFromTime);
+                    etToTime = mView.findViewById(R.id.etToTime);
+                    bCheck = mView.findViewById(R.id.bGetTime);
 
-                mBuilder.setView(mView);
-                timeDialog = mBuilder.create();
-                timeDialog.show();
+                    mBuilder.setView(mView);
+                    timeDialog = mBuilder.create();
+                    timeDialog.show();
 
-                bCheck.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        checkValue();
-                    }
-                });
+                    bCheck.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            checkValue();
+                        }
+                    });
 
-                etFromTime.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Calendar c1 = Calendar.getInstance();
-                        int hourFrom = c1.get(Calendar.HOUR_OF_DAY);
-                        int minuteFrom = c1.get(Calendar.MINUTE);
-                        final Date fromTime = c1.getTime();
-                        CustomTimePickerDialog fromTimePickerDialog = new CustomTimePickerDialog(MainActivity.this,
-                                new CustomTimePickerDialog.OnTimeSetListener() {
-                                    @Override
-                                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                        Calendar cal = Calendar.getInstance();
-                                        cal.set(
-                                                cal.get(Calendar.YEAR),
-                                                cal.get(Calendar.MONTH),
-                                                cal.get(Calendar.DAY_OF_MONTH),
-                                                hourOfDay,
-                                                minute
-                                        );
-                                        fromMillis = cal.getTimeInMillis();
-                                        prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_FROM, fromMillis);
+                    etFromTime.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Calendar c1 = Calendar.getInstance();
+                            int hourFrom = c1.get(Calendar.HOUR_OF_DAY);
+                            int minuteFrom = c1.get(Calendar.MINUTE);
+                            final Date fromTime = c1.getTime();
+                            CustomTimePickerDialog fromTimePickerDialog = new CustomTimePickerDialog(MainActivity.this,
+                                    new CustomTimePickerDialog.OnTimeSetListener() {
+                                        @Override
+                                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                            Calendar cal = Calendar.getInstance();
+                                            cal.set(
+                                                    cal.get(Calendar.YEAR),
+                                                    cal.get(Calendar.MONTH),
+                                                    cal.get(Calendar.DAY_OF_MONTH),
+                                                    hourOfDay,
+                                                    minute
+                                            );
+                                            fromMillis = cal.getTimeInMillis();
+                                            prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_FROM, fromMillis);
 
-                                        Date fromTime = cal.getTime();
+                                            Date fromTime = cal.getTime();
 
-                                        DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
-                                        SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                        df_string_from = format.format(fromTime);
+                                            DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
+                                            SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                                            df_string_from = format.format(fromTime);
 
-                                        etFromTime.setText(df_string_from);
-                                    }
-                                }, hourFrom, minuteFrom, true);
-                        fromTimePickerDialog.show();
-                    }
-                });
+                                            etFromTime.setText(df_string_from);
+                                        }
+                                    }, hourFrom, minuteFrom, true);
+                            fromTimePickerDialog.show();
+                        }
+                    });
 
-                etToTime.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Calendar c2 = Calendar.getInstance();
-                        int hourTo = c2.get(Calendar.HOUR_OF_DAY);
-                        int minuteTo = c2.get(Calendar.MINUTE);
+                    etToTime.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Calendar c2 = Calendar.getInstance();
+                            int hourTo = c2.get(Calendar.HOUR_OF_DAY);
+                            int minuteTo = c2.get(Calendar.MINUTE);
 
 
-                        CustomTimePickerDialog toTimePickerDialog = new CustomTimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                            @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                Calendar cal = Calendar.getInstance();
-                                cal.set(
-                                        cal.get(Calendar.YEAR),
-                                        cal.get(Calendar.MONTH),
-                                        cal.get(Calendar.DAY_OF_MONTH),
-                                        hourOfDay,
-                                        minute
-                                );
-                                toMillis = cal.getTimeInMillis();
-                                prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_TO, toMillis);
+                            CustomTimePickerDialog toTimePickerDialog = new CustomTimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                                @Override
+                                public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                    Calendar cal = Calendar.getInstance();
+                                    cal.set(
+                                            cal.get(Calendar.YEAR),
+                                            cal.get(Calendar.MONTH),
+                                            cal.get(Calendar.DAY_OF_MONTH),
+                                            hourOfDay,
+                                            minute
+                                    );
+                                    toMillis = cal.getTimeInMillis();
+                                    prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_TO, toMillis);
 
-                                Date toTime = cal.getTime();
+                                    Date toTime = cal.getTime();
 
-                                DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
-                                SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                df_string_to = format.format(toTime);
-                                etToTime.setText(df_string_to);
+                                    DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
+                                    SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                                    df_string_to = format.format(toTime);
+                                    etToTime.setText(df_string_to);
 
-                            }
-                        }, hourTo, minuteTo, true);
-                        toTimePickerDialog.show();
-                    }
-                });
+                                }
+                            }, hourTo, minuteTo, true);
+                            toTimePickerDialog.show();
+                        }
+                    });
+
+                }
 
             }
 
@@ -248,7 +253,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private void confirmDialog(String slotName) {
+    private void confirmDialog(final String slotName) {
         View mView = getLayoutInflater().inflate(R.layout.dialog_confirm, null, false);
 
         mBuilder.setView(mView);
@@ -280,6 +285,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intentView = new Intent(v.getContext(), ViewSlotActivity.class);
+                intentView.putExtra("slot_name", slotName);
                 startActivity(intentView);
 
             }
@@ -317,6 +323,10 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this,
                                 error,
                                 Toast.LENGTH_SHORT).show();
+                        if(error.equals("Token expired")) {
+                            Logout();
+                        }
+
                     }
                 });
 
@@ -339,6 +349,9 @@ public class MainActivity extends AppCompatActivity
         String fromTime = etFromTime.getText().toString();
         String toTime = etToTime.getText().toString();
 
+        diff = toMillis - fromMillis;
+
+        Log.e("difference", String.valueOf(diff));
         Log.e("tomillis", String.valueOf(toMillis));
         Log.e("fromMillis", String.valueOf(fromMillis));
 
@@ -346,7 +359,7 @@ public class MainActivity extends AppCompatActivity
         Log.e("et to time", toTime);
 
 
-        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis <= fromMillis || fromMillis < (System.currentTimeMillis() + 1800000)) {
+        if (fromTime.isEmpty() || toTime.isEmpty() || toMillis <= fromMillis || fromMillis < (System.currentTimeMillis() + 1800000) || diff <= 1700000) {
 
             Toast.makeText(MainActivity.this,
                     "Invalid time",
@@ -363,7 +376,8 @@ public class MainActivity extends AppCompatActivity
                 public void onSuccess(CheckSlotResponse response) {
                     loading.dismiss();
                     idSlot = response.data.getIdSlot();
-                    confirmDialog(response.data.getSlotName());
+                    String slotName = response.data.getSlotName();
+                    confirmDialog(slotName);
                 }
 
                 @Override
@@ -419,6 +433,15 @@ public class MainActivity extends AppCompatActivity
 //            return;
 //        }
 
+    }
+
+    private void Logout() {
+        final String token = prefManager.getString(SmartParkingSharedPreferences.PREF_TOKEN);
+        SharedPreferences.Editor editor = prefManager.clear();
+        final boolean logged = false;
+        prefManager.setBoolean(SmartParkingSharedPreferences.PREF_LOGGED, logged);
+        Intent intentLogin = new Intent(MainActivity.this, RegisterLoginActivity.class);
+        startActivity(intentLogin);
     }
 
 
@@ -493,10 +516,7 @@ public class MainActivity extends AppCompatActivity
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            final String token = prefManager.getString(SmartParkingSharedPreferences.PREF_TOKEN);
-                            SharedPreferences.Editor editor = prefManager.clear();
-                            Intent intentLogin = new Intent(MainActivity.this, RegisterLoginActivity.class);
-                            startActivity(intentLogin);
+                            Logout();
                         }
                     })
                     .setNegativeButton("No", null);

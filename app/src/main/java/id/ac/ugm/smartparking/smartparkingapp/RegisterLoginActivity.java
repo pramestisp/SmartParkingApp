@@ -74,10 +74,14 @@ public class RegisterLoginActivity extends AppCompatActivity {
         tvForgot = findViewById(R.id.tvForgotPW);
         tvForgot.setMovementMethod(LinkMovementMethod.getInstance());
 
-        inputEmail.setText("bebek@ayam.com");
-        inputPassword.setText("sayaarina");
+//        inputEmail.setText("bebek@ayam.com");
+//        inputPassword.setText("sayaarina");
 
         network = new Network(this);
+
+        if (prefManager.getBoolean(SmartParkingSharedPreferences.PREF_LOGGED)) {
+            goToMain();
+        }
 
         toggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,7 +93,6 @@ public class RegisterLoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                intentMain = new Intent(view.getContext(), MainActivity.class);
                 getText();
                 if (isLogin) {
                     //login with email
@@ -118,7 +121,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
             loading.dismiss();
         }
 
-        else if (!email.matches("[a-zA-Z0-9._-]+@[a-z]+.[a-z]+")) {
+        else if (!email.matches("[a-zA-Z0-9._-]+@[a-z]+.[a-z]+") || !email.matches("[a-zA-Z0-9._-]+@[a-z]+.[a-z]+.[a-z]")) {
             Toast.makeText(RegisterLoginActivity.this,
                     "Invalid email format",
                     Toast.LENGTH_SHORT).show();
@@ -155,12 +158,13 @@ public class RegisterLoginActivity extends AppCompatActivity {
 
                     loading.dismiss();
 
-                    if(prefManager.getBoolean(SmartParkingSharedPreferences.PREF_LOGGED)) {
-                        startActivity(intentMain);
-                    }
-                    else {
-                        return;
-                    }
+                    goToMain();
+
+//                    if(prefManager.getBoolean(SmartParkingSharedPreferences.PREF_LOGGED)) {
+//                    }
+//                    else {
+//                        return;
+//                    }
                 }
 
                 @Override
@@ -185,7 +189,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
             loading.dismiss();
         }
 
-        else if (!email.matches("[a-zA-Z0-9._-]+@[a-z]+.[a-z]+")) {
+        else if (!email.matches("[a-zA-Z0-9._-]+@[a-z]+.[a-z]+.[a-z]+.[a-z]")) {
             Toast.makeText(RegisterLoginActivity.this,
                     "Email format is invalid",
                     Toast.LENGTH_SHORT).show();
@@ -194,11 +198,9 @@ public class RegisterLoginActivity extends AppCompatActivity {
 
         else {
             final RegisterRequestModel request = new RegisterRequestModel(name, email, password, car_type, license_no);
-
             network.Register(request, new Network.MyCallback<String>() {
                 @Override
                 public void onSuccess(String response) {
-
                     final AlertDialog.Builder builder = new AlertDialog.Builder(RegisterLoginActivity.this);
                     builder.setMessage("Register success! Please check your email to verify your account")
                             .setPositiveButton("OK", null).show();
@@ -251,6 +253,11 @@ public class RegisterLoginActivity extends AppCompatActivity {
             //logo.setVisibility(View.VISIBLE);
             isLogin = true;
         }
+    }
+
+    private void goToMain() {
+        intentMain = new Intent(RegisterLoginActivity.this, MainActivity.class);
+        startActivity(intentMain);
     }
     private void toggleProgressBar() {
         if (progressBar.getVisibility() == View.GONE) {

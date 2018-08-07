@@ -23,11 +23,13 @@ class RecyclerViewSlotAdapter extends RecyclerView.Adapter<RecyclerViewSlotAdapt
     private Context context;
     private List<CheckSlot> slotList;
     private LayoutInflater inflater;
+    private String slotNo;
 
-    public RecyclerViewSlotAdapter(Context context, List<CheckSlot> slotList) {
+    public RecyclerViewSlotAdapter(Context context, List<CheckSlot> slotList, String slotNo) {
         this.inflater = LayoutInflater.from(context);
         this.slotList = slotList;
         this.context = context;
+        this.slotNo = slotNo;
     }
 
     @Override
@@ -62,7 +64,7 @@ class RecyclerViewSlotAdapter extends RecyclerView.Adapter<RecyclerViewSlotAdapt
         public void bindData(CheckSlot slot) {
             pref = new SmartParkingSharedPreferences(context);
             slotName = slot.getSlotName();
-            if (slotName.equals(pref.getString(SmartParkingSharedPreferences.PREF_SLOT_NAME))) {
+            if (slotName.equals(slotNo)) {
                 slotLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.yellow));
                 tvSlot.setText(slotName);
             } else {

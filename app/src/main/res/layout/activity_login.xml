@@ -138,7 +138,7 @@
                         <EditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Car Type"
+                            android:hint="Car Type (ex: Honda Jazz, Toyota Avanza)"
                             android:inputType="text"
                             android:id="@+id/etLoginCarModel"
                             android:maxLines="1"
@@ -154,7 +154,7 @@
                         <EditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Car License Number"
+                            android:hint="Vehicle Registration Plate"
                             android:id="@+id/etLicenseNo"
                             android:inputType="textCapWords"
                             android:maxLines="1"

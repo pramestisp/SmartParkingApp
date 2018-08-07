@@ -69,13 +69,21 @@
         <!--android:textStyle="bold"-->
         <!--android:textSize="18sp"/>-->
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Arrival time must be at least 30 minutes from now"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:textAlignment="center"
+        android:textSize="12sp"/>
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="check"
         style="@style/YellowButton"
-        android:id="@+id/bGetTime"
-        android:layout_marginTop="10dp"/>
+        android:id="@+id/bGetTime"/>
 
 
     <!--<LinearLayout-->

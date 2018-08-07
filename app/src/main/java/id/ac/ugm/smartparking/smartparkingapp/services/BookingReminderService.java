@@ -20,9 +20,9 @@ import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreference
 
 public class BookingReminderService extends Service {
     SmartParkingSharedPreferences prefManager;
-    BroadcastReceiver brReminder, brTimeUp;
-    IntentFilter intentFilter1, intentFilter2;
-    PendingIntent pendingIntent1, pendingIntent2;
+    BroadcastReceiver brReminder, brTimeUp, brOvertime;
+    IntentFilter intentFilter1, intentFilter2, intentFilter3;
+    PendingIntent pendingIntent1, pendingIntent2, pendingIntent3;
     AlarmManager alarmManager;
     Notif notif;
     long fromTime;
@@ -53,7 +53,10 @@ public class BookingReminderService extends Service {
         pendingIntent1 = PendingIntent.getBroadcast(this, 0,
                 new Intent("id.ac.ugm.smartparking.smartparkingapp-book" + fromTime), PendingIntent.FLAG_ONE_SHOT);
         pendingIntent2 = PendingIntent.getBroadcast(this, 0,
-                new Intent("id.ac.ugm.smartparking.smartparkingapp-book"), PendingIntent.FLAG_ONE_SHOT);
+                new Intent("id.ac.ugm.smartparking.smartparkingapp-bookTimeUp"), PendingIntent.FLAG_ONE_SHOT);
+        pendingIntent3 = PendingIntent.getBroadcast(this, 0,
+                new Intent("id.ac.ugm.smartparking.smartparkingapp-bookOvertime"), PendingIntent.FLAG_ONE_SHOT);
+
 //        notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
 
@@ -67,22 +70,30 @@ public class BookingReminderService extends Service {
                         300,
                         0);
 
-                Log.e("15 minutes", "15 minutes");
-//                startService(new Intent(BookingReminderService.this, CheckSlotService.class));
             }
         };
 
         brTimeUp = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //TODO: tambahin service cek slot, set repeating -> wow kurasa ini terlalu advanced
                 notif.updateNotif(context,
                         "Arrival - Time's up",
-                        "Your time is up. The booking will be cancelled.",
-                        500,
+                        "Your time is up. The booking will be cancelled in 10 minutes.",
+                        300,
                         0);
 
                 Log.e("time's up", "time's up");
+            }
+        };
+
+        brOvertime = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                notif.updateNotif(context,
+                        "Arrival - Cancelled",
+                        "Your booking is cancelled",
+                        500,
+                        0);
             }
         };
 
@@ -90,16 +101,20 @@ public class BookingReminderService extends Service {
 
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, fromTime - 900000, pendingIntent1);
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, fromTime, pendingIntent2);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, fromTime + 600000, pendingIntent3);
 //        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() +10000, pendingIntent1);
 //        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 20000, pendingIntent2);
 
         intentFilter1 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp-book" + fromTime);
         intentFilter1.setPriority(100);
-        intentFilter2 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp-book");
+        intentFilter2 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp-bookTimeUp");
         intentFilter2.setPriority(100);
+        intentFilter3 = new IntentFilter("id.ac.ugm.smartparking.smartparkingapp-bookOvertime");
+        intentFilter3.setPriority(100);
 
         registerReceiver(brReminder, intentFilter1);
         registerReceiver(brTimeUp, intentFilter2);
+        registerReceiver(brOvertime, intentFilter3);
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -109,7 +124,7 @@ public class BookingReminderService extends Service {
     public void onDestroy() {
         unregisterReceiver(brReminder);
         unregisterReceiver(brTimeUp);
-//        stopService(new Intent(BookingReminderService.this, CheckSlotService.class));
+        unregisterReceiver(brOvertime);
     }
 
 }

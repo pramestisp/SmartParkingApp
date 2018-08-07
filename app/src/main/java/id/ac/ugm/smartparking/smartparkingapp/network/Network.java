@@ -6,16 +6,14 @@ import com.google.gson.Gson;
 
 import java.util.concurrent.TimeUnit;
 
-import id.ac.ugm.smartparking.smartparkingapp.R;
+import id.ac.ugm.smartparking.smartparkingapp.model.ArrivedCheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.BalanceResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
-import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotStatusResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.GetAllSlotsResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.HistoryResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.LoginResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.RegisterRequestModel;
-import id.ac.ugm.smartparking.smartparkingapp.model.ReservationNewRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import okhttp3.OkHttpClient;
@@ -99,6 +97,9 @@ public class Network {
                     callback.onSuccess(response.body());
                 }
                 else {
+                    if (response.code() == 422) {
+                        callback.onError("Please verify your email first");
+                    }
                     callback.onError("Login failed");
                 }
             }
@@ -119,6 +120,9 @@ public class Network {
                 if (response.isSuccessful()) {
                     callback.onSuccess(response.body());
                 } else {
+                    if (response.code() == 404) {
+                        callback.onError("Full booked");
+                    }
                     callback.onError("Please choose another time");
                 }
             }
@@ -138,7 +142,13 @@ public class Network {
                 if (response.isSuccessful()) {
                     callback.onSuccess(response.body());
                 } else {
-                    callback.onError("Reservation failed");
+                    if(response.code() == 401) {
+                        callback.onError("Token expired");
+                    } else if (response.code() == 402) {
+                        callback.onError("Insufficient balance");
+                    } else {
+                        callback.onError("Reservation failed");
+                    }
                 }
             }
 
@@ -186,22 +196,6 @@ public class Network {
         });
     }
 
-    public void getSlotStatus(final int id_reservation, final MyCallback<CheckSlotStatusResponse> callback) {
-        service.getSlotStatus(id_reservation).enqueue(new Callback<CheckSlotStatusResponse>() {
-            @Override
-            public void onResponse(Call<CheckSlotStatusResponse> call, Response<CheckSlotStatusResponse> response) {
-                if(response.isSuccessful()) {
-                    callback.onSuccess(response.body());
-                }
-                else callback.onError("Get Slot Status Error");
-            }
-
-            @Override
-            public void onFailure(Call<CheckSlotStatusResponse> call, Throwable t) {
-                callback.onError(t.getLocalizedMessage());
-            }
-        });
-    }
 
     public void cancel(final int id_reservation, final MyCallback<ResponseBody> callback) {
         service.cancel(id_reservation).enqueue(new Callback<ResponseBody>() {
@@ -238,8 +232,8 @@ public class Network {
         });
     }
 
-    public void balanceCharged(final int id_user, final MyCallback<ResponseBody> callback) {
-        service.balanceCharged(id_user).enqueue(new Callback<ResponseBody>() {
+    public void penaltyCharge(final int id_user, final MyCallback<ResponseBody> callback) {
+        service.penaltyCharge(id_user).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
@@ -251,6 +245,63 @@ public class Network {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void addCharge(final int id_reservation, final MyCallback<ResponseBody> callback) {
+        service.addCharge(id_reservation).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Add charge error");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+
+            }
+        });
+    }
+
+    public void arrivedCheckSlot(final int id_reservation, final MyCallback<ArrivedCheckSlotResponse> callback) {
+        service.arrivedCheck(id_reservation).enqueue(new Callback<ArrivedCheckSlotResponse>() {
+            @Override
+            public void onResponse(Call<ArrivedCheckSlotResponse> call, Response<ArrivedCheckSlotResponse> response) {
+                if(response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Check slot error");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrivedCheckSlotResponse> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void changeSlot(final int id_reservation, final ReservationRequestModel request, final MyCallback<ReservationResponse> callback) {
+        service.changeSlot(id_reservation, request).enqueue(new Callback<ReservationResponse>() {
+            @Override
+            public void onResponse(Call<ReservationResponse> call, Response<ReservationResponse> response) {
+                if(response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                } else if (response.code() == 402) {
+                    callback.onError("Insufficient balance");
+                } else {
+                    callback.onError("Change slot failed");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReservationResponse> call, Throwable t) {
                 callback.onError(t.getLocalizedMessage());
             }
         });

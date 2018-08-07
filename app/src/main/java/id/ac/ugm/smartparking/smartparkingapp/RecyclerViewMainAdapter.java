@@ -2,12 +2,14 @@ package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -47,13 +49,19 @@ public class RecyclerViewMainAdapter extends RecyclerView.Adapter<RecyclerViewMa
 
     class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout slotLayout;
+        TextView tvSlot;
+        String slotName;
 
         ViewHolder(View view) {
             super(view);
             slotLayout = view.findViewById(R.id.layoutSlot);
+            tvSlot = view.findViewById(R.id.tvInfo);
         }
 
         private void bindData(CheckSlot slot) {
+            slotName = slot.getSlotName();
+            tvSlot.setText(slotName);
+            tvSlot.setTextColor(Color.WHITE);
             if (slot.getStatus().equals(Constants.AVAILABLE)) {
                 slotLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.green));
             } else {

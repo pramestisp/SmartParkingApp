@@ -9,15 +9,15 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="You got a new slot"
-        android:textSize="24sp"
+        android:text="Your slot is already occupied. But don't worry, we got a new slot for you"
+        android:textSize="18sp"
         android:textAlignment="center"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tvSlotNo"
         android:textSize="72sp"
-        android:padding="10dp"
+        android:padding="5dp"
         android:textAlignment="center"
         android:text="A123"/>
     <Button
@@ -25,8 +25,7 @@
         android:layout_height="wrap_content"
         android:text="view slot"
         android:id="@+id/bViewSlot"
-        android:background="#F57C00"
-        android:textColor="#FFFF"/>
+        style="@style/YellowButton"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,17 +37,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="no"
-            android:id="@+id/bNo" />
+            android:text="cancel booking"
+            android:theme="@style/RedButton"
+            android:id="@+id/bDontChange" />
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="yes"
-            android:id="@+id/bYes" />
+            android:id="@+id/bChangeSlot"
+            android:theme="@style/GreenButton"/>
     </LinearLayout>
 
 </LinearLayout>

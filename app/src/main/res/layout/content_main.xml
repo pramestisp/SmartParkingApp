@@ -17,6 +17,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="50dp"
             android:orientation="vertical"
             android:id="@+id/all_slots">
 
@@ -27,23 +28,37 @@
 
         </LinearLayout>
 
-        <LinearLayout
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:gravity="center"-->
+            <!--android:layout_alignParentBottom="true">-->
+
+            <!--<Button-->
+                <!--android:id="@+id/bBook"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Book A Slot"-->
+                <!--android:background="@color/colorAccent"-->
+                <!--android:textColor="#000"/>-->
+
+        <!--</LinearLayout>-->
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+        <Button
+            android:id="@+id/bBook"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_alignParentBottom="true">
-
-            <Button
-                android:id="@+id/bBook"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Book A Slot"
-                android:background="@color/colorAccent"
-                android:textColor="#000"/>
-
-        </LinearLayout>
-
+            android:text="Book A Slot"
+            android:background="@color/colorAccent"
+            android:textColor="#000"/>
 
     </RelativeLayout>
 
