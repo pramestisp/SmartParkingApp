@@ -121,7 +121,7 @@ public class RegisterLoginActivity extends AppCompatActivity {
             loading.dismiss();
         }
 
-        else if (!email.matches("[a-zA-Z0-9._-]+@[a-z]+.[a-z]+") || !email.matches("[a-zA-Z0-9._-]+@[a-z]+.[a-z]+.[a-z]")) {
+        else if (!email.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")) {
             Toast.makeText(RegisterLoginActivity.this,
                     "Invalid email format",
                     Toast.LENGTH_SHORT).show();
@@ -189,9 +189,9 @@ public class RegisterLoginActivity extends AppCompatActivity {
             loading.dismiss();
         }
 
-        else if (!email.matches("[a-zA-Z0-9._-]+@[a-z]+.[a-z]+.[a-z]+.[a-z]")) {
+        else if (!email.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")) {
             Toast.makeText(RegisterLoginActivity.this,
-                    "Email format is invalid",
+                    "Invalid email format",
                     Toast.LENGTH_SHORT).show();
             loading.dismiss();
         }
