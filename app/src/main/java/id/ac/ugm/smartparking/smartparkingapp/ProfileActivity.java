@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import java.io.IOException;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 
 /**
@@ -24,7 +25,7 @@ import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreference
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private ImageView ivProfile;
+    private CircleImageView ivProfile;
 
     private TextView tvName, tvEmail, tvCarType, tvCarNo;
 
@@ -44,7 +45,7 @@ public class ProfileActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        ivProfile = findViewById(R.id.ivProfilePhoto);
+        ivProfile = findViewById(R.id.civProfilePhoto);
         tvName = findViewById(R.id.tvProfileName);
         tvEmail = findViewById(R.id.tvProfileEmail);
         tvCarType = findViewById(R.id.tvProfileCarType);

@@ -16,27 +16,36 @@
         android:paddingBottom="15dp"
         android:id="@+id/rl_1">
 
-        <ImageView
-            android:id="@+id/ivProfilePhoto"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_height="80dp"
+            android:layout_width="80dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="15dp"
-            android:adjustViewBounds="true"
-            android:background="@drawable/imageview_circle"
-            android:padding="3dp"
-            android:scaleType="centerInside" />
-        <!--TODO: circular image-->
+            android:src="@drawable/parkys_02_bg"
+            android:id="@+id/civProfilePhoto"/>
+        <!--<ImageView-->
+            <!--android:id="@+id/ivProfilePhoto"-->
+            <!--android:layout_width="100dp"-->
+            <!--android:layout_height="100dp"-->
+            <!--android:layout_alignParentTop="true"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--android:layout_marginTop="15dp"-->
+            <!--android:adjustViewBounds="true"-->
+            <!--android:background="@drawable/imageview_circle"-->
+            <!--android:padding="3dp"-->
+            <!--android:scaleType="centerInside" />-->
+
         <TextView
             android:id="@+id/tvProfileName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/ivProfilePhoto"
+            android:layout_below="@id/civProfilePhoto"
             android:layout_marginTop="10sp"
             android:layout_centerHorizontal="true"
             android:textColor="#000000"
-            android:textSize="30sp"/>
+            android:textSize="28sp"
+            android:text="Name"/>
 
     </RelativeLayout>
 

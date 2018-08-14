@@ -58,12 +58,14 @@ public interface NetworkService {
     @GET("balance/penaltycharge/{id_user}")
     Call<ResponseBody> penaltyCharge(@Path("id_user") int id_user);
 
-    @GET("balance/addcharge/{id_reservation}")
-    Call<ResponseBody> addCharge(@Path("id_reservation") int id_reservation);
+    @Headers("Accept: application/json")
+    @PATCH("balance/addcharge/{id_reservation}")
+    Call<ResponseBody> addCharge(@Path("id_reservation") int id_reservation, @Body ReservationRequestModel request);
 
     @GET("carparkslot/checkslot/{id_reservation}")
     Call<ArrivedCheckSlotResponse> arrivedCheck(@Path("id_reservation") int id_reservation);
 
+    @Headers("Accept: application/json")
     @PATCH("reservation/changeslot/{id_reservation}")
     Call<ReservationResponse> changeSlot(@Path("id_reservation") int id_reservation, @Body ReservationRequestModel request);
 

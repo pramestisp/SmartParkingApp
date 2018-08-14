@@ -2,19 +2,19 @@ package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -26,20 +26,17 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import id.ac.ugm.smartparking.smartparkingapp.model.BalanceResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlot;
 import id.ac.ugm.smartparking.smartparkingapp.model.CheckSlotResponse;
 import id.ac.ugm.smartparking.smartparkingapp.model.GetAllSlotsResponse;
@@ -47,16 +44,17 @@ import id.ac.ugm.smartparking.smartparkingapp.model.ReservationRequestModel;
 import id.ac.ugm.smartparking.smartparkingapp.model.ReservationResponse;
 import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 import id.ac.ugm.smartparking.smartparkingapp.services.BookingReminderService;
+import id.ac.ugm.smartparking.smartparkingapp.utils.Constants;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     public NumberFormat RpFormat;
 
     private EditText etFromTime, etToTime;
 
-    private TextView tvName, tvEmail;
+    private TextView tvName, tvEmail, tvBalance, tvSlotAmount;
 
     private Button bCheck;
 
@@ -68,7 +66,7 @@ public class MainActivity extends AppCompatActivity
 
     float price, time;
 
-    public int hour, min, millis, bookFee, feePerHour, feePer30Min, idSlot;
+    public int hour, min, millis, bookFee, feePerHour, idSlot;
 
     String df_string_from, df_string_to, drawer_name, drawer_email;
 
@@ -100,8 +98,9 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView.getMenu().getItem(0). setChecked(true);
+        navigationView.getMenu().getItem(0).setChecked(true);
         onNavigationItemSelected(navigationView.getMenu().getItem(0));
+
 
         View headerView = navigationView.getHeaderView(0);
         getIntent();
@@ -118,112 +117,201 @@ public class MainActivity extends AppCompatActivity
         tvName.setText(drawer_name);
         tvEmail.setText(drawer_email);
 
-        final Button bBook = findViewById(R.id.bBook);
+//        final Button bBook = findViewById(R.id.bBook);
 
         mBuilder = new AlertDialog.Builder(MainActivity.this);
 
-        bBook.setOnClickListener(new View.OnClickListener() {
+        CardView cardView = findViewById(R.id.card_view);
+        tvBalance = findViewById(R.id.tvBalanceHome);
+        tvSlotAmount = findViewById(R.id.tvSlots);
+
+        loading.setMessage("Loading");
+        loading.show();
+
+        showBalance();
+        slots();
+
+        cardView.isClickable();
+
+        cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
-                if(prefManager.getBoolean(SmartParkingSharedPreferences.PREF_RESERVED)) {
-                    Toast.makeText(MainActivity.this,
-                            "You have an ongoing reservation",
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    View mView = getLayoutInflater().inflate(R.layout.dialog_choose_time, null, false);
-
-                    etFromTime = mView.findViewById(R.id.etFromTime);
-                    etToTime = mView.findViewById(R.id.etToTime);
-                    bCheck = mView.findViewById(R.id.bGetTime);
-
-                    mBuilder.setView(mView);
-                    timeDialog = mBuilder.create();
-                    timeDialog.show();
-
-                    bCheck.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            checkValue();
-                        }
-                    });
-
-                    etFromTime.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Calendar c1 = Calendar.getInstance();
-                            int hourFrom = c1.get(Calendar.HOUR_OF_DAY);
-                            int minuteFrom = c1.get(Calendar.MINUTE);
-                            final Date fromTime = c1.getTime();
-                            CustomTimePickerDialog fromTimePickerDialog = new CustomTimePickerDialog(MainActivity.this,
-                                    new CustomTimePickerDialog.OnTimeSetListener() {
-                                        @Override
-                                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                            Calendar cal = Calendar.getInstance();
-                                            cal.set(
-                                                    cal.get(Calendar.YEAR),
-                                                    cal.get(Calendar.MONTH),
-                                                    cal.get(Calendar.DAY_OF_MONTH),
-                                                    hourOfDay,
-                                                    minute
-                                            );
-                                            fromMillis = cal.getTimeInMillis();
-                                            prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_FROM, fromMillis);
-
-                                            Date fromTime = cal.getTime();
-
-                                            DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
-                                            SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                            df_string_from = format.format(fromTime);
-
-                                            etFromTime.setText(df_string_from);
-                                        }
-                                    }, hourFrom, minuteFrom, true);
-                            fromTimePickerDialog.show();
-                        }
-                    });
-
-                    etToTime.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Calendar c2 = Calendar.getInstance();
-                            int hourTo = c2.get(Calendar.HOUR_OF_DAY);
-                            int minuteTo = c2.get(Calendar.MINUTE);
-
-
-                            CustomTimePickerDialog toTimePickerDialog = new CustomTimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                                @Override
-                                public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                    Calendar cal = Calendar.getInstance();
-                                    cal.set(
-                                            cal.get(Calendar.YEAR),
-                                            cal.get(Calendar.MONTH),
-                                            cal.get(Calendar.DAY_OF_MONTH),
-                                            hourOfDay,
-                                            minute
-                                    );
-                                    toMillis = cal.getTimeInMillis();
-                                    prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_TO, toMillis);
-
-                                    Date toTime = cal.getTime();
-
-                                    DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
-                                    SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                    df_string_to = format.format(toTime);
-                                    etToTime.setText(df_string_to);
-
-                                }
-                            }, hourTo, minuteTo, true);
-                            toTimePickerDialog.show();
-                        }
-                    });
-
-                }
-
+                startActivity(new Intent(MainActivity.this, ReservationActivity.class));
             }
-
         });
 
-        checkCarParkSlot();
     }
+
+    private void showBalance() {
+        int idUser = prefManager.getInt(SmartParkingSharedPreferences.PREF_USER_ID);
+        network.getBalance(idUser, new Network.MyCallback<BalanceResponse>() {
+            @Override
+            public void onSuccess(BalanceResponse response) {
+                loading.dismiss();
+                BalanceResponse.Data data = response.getData();
+                float balance = data.getBalance();
+                Locale localeID = new Locale("in", "ID");
+                NumberFormat RpFormat = NumberFormat.getCurrencyInstance(localeID);
+                tvBalance.setText(RpFormat.format((double) balance));
+            }
+
+            @Override
+            public void onError(String error) {
+                loading.dismiss();
+                Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
+                tvBalance.setText("Can't get balance");
+            }
+        });
+    }
+
+    private void slots() {
+        network.getAllSlot(new Network.MyCallback<GetAllSlotsResponse>() {
+            @Override
+            public void onSuccess(GetAllSlotsResponse response) {
+                loading.dismiss();
+                List<CheckSlot> slotList = response.getData();
+                CheckSlot checkSlot = new CheckSlot();
+                filter(slotList, checkSlot.getStatus());
+            }
+
+            @Override
+            public void onError(String error) {
+                loading.dismiss();
+                tvSlotAmount.setText("Get slot failed");
+                tvSlotAmount.setTextColor(Color.RED);
+                Log.e("error", error);
+            }
+        });
+
+    }
+
+//    private static CheckSlot getSlotStatus(List<CheckSlot> slot, String status) {
+//        CheckSlot result = null;
+//        for(CheckSlot temp : slot) {
+//            if(status.equals(temp.getStatus().equals(Constants.AVAILABLE))) {
+//                result = temp;
+//            }
+//        }
+//        return result;
+//        Log.e("slot", String.valueOf(result));
+//    }
+
+    private void filter(List<CheckSlot> slots, String status) {
+        List<CheckSlot> newList = new ArrayList<>();
+        for (CheckSlot slot : slots) {
+            if(slot.getStatus().equals(Constants.AVAILABLE)) {
+                newList.add(slot);
+            }
+        }
+        int size = newList.size();
+        tvSlotAmount.setText(String.valueOf(size) + " available slots");
+        Log.e("new list", String.valueOf(newList));
+        Log.e("new list size", String.valueOf(size));
+
+
+    }
+//        bBook.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                if(prefManager.getBoolean(SmartParkingSharedPreferences.PREF_RESERVED)) {
+//                    Toast.makeText(MainActivity.this,
+//                            "You have an ongoing reservation",
+//                            Toast.LENGTH_SHORT).show();
+//                } else {
+//                    View mView = getLayoutInflater().inflate(R.layout.dialog_choose_time, null, false);
+//
+//                    etFromTime = mView.findViewById(R.id.etFromTime);
+//                    etToTime = mView.findViewById(R.id.etToTime);
+//                    bCheck = mView.findViewById(R.id.bGetTime);
+//
+//                    mBuilder.setView(mView);
+//                    timeDialog = mBuilder.create();
+//                    timeDialog.show();
+//
+//                    bCheck.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            checkValue();
+//                        }
+//                    });
+//
+//                    etFromTime.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            Calendar c1 = Calendar.getInstance();
+//                            int hourFrom = c1.get(Calendar.HOUR_OF_DAY);
+//                            int minuteFrom = c1.get(Calendar.MINUTE);
+//                            final Date fromTime = c1.getTime();
+//                            CustomTimePickerDialog fromTimePickerDialog = new CustomTimePickerDialog(MainActivity.this,
+//                                    new CustomTimePickerDialog.OnTimeSetListener() {
+//                                        @Override
+//                                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+//                                            Calendar cal = Calendar.getInstance();
+//                                            cal.set(
+//                                                    cal.get(Calendar.YEAR),
+//                                                    cal.get(Calendar.MONTH),
+//                                                    cal.get(Calendar.DAY_OF_MONTH),
+//                                                    hourOfDay,
+//                                                    minute
+//                                            );
+//                                            fromMillis = cal.getTimeInMillis();
+//                                            prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_FROM, fromMillis);
+//
+//                                            Date fromTime = cal.getTime();
+//
+//                                            DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
+//                                            SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+//                                            df_string_from = format.format(fromTime);
+//
+//                                            etFromTime.setText(df_string_from);
+//                                        }
+//                                    }, hourFrom, minuteFrom, true);
+//                            fromTimePickerDialog.show();
+//                        }
+//                    });
+//
+//                    etToTime.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            Calendar c2 = Calendar.getInstance();
+//                            int hourTo = c2.get(Calendar.HOUR_OF_DAY);
+//                            int minuteTo = c2.get(Calendar.MINUTE);
+//
+//
+//                            CustomTimePickerDialog toTimePickerDialog = new CustomTimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+//                                @Override
+//                                public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+//                                    Calendar cal = Calendar.getInstance();
+//                                    cal.set(
+//                                            cal.get(Calendar.YEAR),
+//                                            cal.get(Calendar.MONTH),
+//                                            cal.get(Calendar.DAY_OF_MONTH),
+//                                            hourOfDay,
+//                                            minute
+//                                    );
+//                                    toMillis = cal.getTimeInMillis();
+//                                    prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_TO, toMillis);
+//
+//                                    Date toTime = cal.getTime();
+//
+//                                    DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
+//                                    SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+//                                    df_string_to = format.format(toTime);
+//                                    etToTime.setText(df_string_to);
+//
+//                                }
+//                            }, hourTo, minuteTo, true);
+//                            toTimePickerDialog.show();
+//                        }
+//                    });
+//
+//                }
+//
+//            }
+//
+//        });
+//
+//        checkCarParkSlot();
+//    }
 
     public void checkCarParkSlot() {
         loading.setMessage("Checking Park Slot");
@@ -304,6 +392,7 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onSuccess(ReservationResponse response) {
                         loading.dismiss();
+                        confirmDialog.dismiss();
                         Toast.makeText(MainActivity.this,
                                 "Reservation success",
                                 Toast.LENGTH_SHORT).show();
@@ -374,6 +463,7 @@ public class MainActivity extends AppCompatActivity
             network.getSlot(params, new Network.MyCallback<CheckSlotResponse>() {
                 @Override
                 public void onSuccess(CheckSlotResponse response) {
+                    timeDialog.dismiss();
                     loading.dismiss();
                     idSlot = response.data.getIdSlot();
                     String slotName = response.data.getSlotName();
@@ -410,28 +500,21 @@ public class MainActivity extends AppCompatActivity
 
     public void priceCount() {
 //        timeDiff(fromMillis, toMillis);
-        //TODO: fix price
         diff = toMillis - fromMillis;
 
         millis = 3600000;
         bookFee = 10000;
         feePerHour = 3000;
-//        price = bookFee + (hour * feePerHour);
         time = (float) diff / millis;
         BigDecimal bd = new BigDecimal(time);
         bd = bd.setScale(1, BigDecimal.ROUND_HALF_UP);
         price = bookFee + (bd.floatValue() * feePerHour);
         Log.e("diff", String.valueOf(diff));
-        Log.e("time", String.valueOf(diff/millis));
+        Log.e("time", String.valueOf(time));
         Log.e("bd", String.valueOf(bd));
         Log.e("price", String.valueOf(bd.floatValue()*feePerHour));
         Log.e("finalprice", String.valueOf(price));
 
-//        if(min == 30) {
-//            price += feePer30Min;
-//        } else {
-//            return;
-//        }
 
     }
 
@@ -443,6 +526,7 @@ public class MainActivity extends AppCompatActivity
         Intent intentLogin = new Intent(MainActivity.this, RegisterLoginActivity.class);
         startActivity(intentLogin);
     }
+
 
 
     @Override
@@ -459,21 +543,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_action_bar, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_refresh) {
-            checkCarParkSlot();
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -538,8 +608,5 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    @Override
-    public void onClick(View v) {
 
-    }
 }

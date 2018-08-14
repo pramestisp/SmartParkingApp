@@ -1,17 +1,13 @@
 package id.ac.ugm.smartparking.smartparkingapp;
 
 import android.app.AlarmManager;
-import android.app.Dialog;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Vibrator;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -21,6 +17,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -50,7 +48,7 @@ public class OngoingActivity extends AppCompatActivity {
     private SmartParkingSharedPreferences prefManager;
 
     private long fromTime, toTime, currentTime, timeLeft, start, stop;
-    float price;
+    float price, charge, newPrice;
     int idSlot, hour, min, idUser, idReservation;
     boolean arrived, reserved;
     private static String slotNo;
@@ -59,9 +57,8 @@ public class OngoingActivity extends AppCompatActivity {
     AlertDialog.Builder builder;
     AlertDialog confirmDialog;
     ProgressDialog loading;
-    CountDownTimer timer, timer10;
+    CountDownTimer timer;
     Vibrator mVibrator;
-    MainActivity mainActivity;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,7 +68,6 @@ public class OngoingActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        mainActivity = new MainActivity();
         network = new Network(this);
         prefManager = new SmartParkingSharedPreferences(this);
         tvTimeCountdown = findViewById(R.id.tvDate);
@@ -143,13 +139,13 @@ public class OngoingActivity extends AppCompatActivity {
                         //TODO: TAMBAHKAN SEMUA TAMBAHAN DARI PAK WAYAN DI BAWAH INI
                         if(currentTime <= (fromTime - 600000) ) {
                             AlertDialog.Builder mBuilder = new AlertDialog.Builder(OngoingActivity.this);
-                            mBuilder.setMessage("We didn't expect that you come earlier. You will be charged Rp1.500. Continue?")
+                            mBuilder.setMessage("We didn't expect that you come earlier. You will be charged Rp3.000/hour. Continue?")
                                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
-                                            //panggil api cek ada orang/ga
                                             loading.setMessage("Checking slot");
                                             loading.show();
+                                            countCharge();
                                             network.arrivedCheckSlot(idReservation, new Network.MyCallback<ArrivedCheckSlotResponse>() {
                                                 @Override
                                                 public void onSuccess(ArrivedCheckSlotResponse response) {
@@ -165,7 +161,9 @@ public class OngoingActivity extends AppCompatActivity {
 
                                                     } else {
                                                         loading.show();
-                                                        network.addCharge(idReservation, new Network.MyCallback<ResponseBody>() {
+                                                        final ReservationRequestModel request = new ReservationRequestModel();
+                                                        request.setPrice(charge);
+                                                        network.addCharge(idReservation, request, new Network.MyCallback<ResponseBody>() {
                                                             @Override
                                                             public void onSuccess(ResponseBody response) {
                                                                 loading.dismiss();
@@ -275,6 +273,20 @@ public class OngoingActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    private void countCharge() {
+        float chargePerHour = 3000;
+        double hour = (double) timeLeft / 3600000;
+        double f = 0.5;
+        double hour_rounded = f * Math.ceil(hour / f);
+        Log.e("hour rounded", String.valueOf(hour_rounded));
+        if (hour_rounded <= 0.5 ) {
+            charge = chargePerHour;
+        } else {
+            charge = (float) (hour_rounded * chargePerHour);
+        }
+        Log.e("charge", String.valueOf(charge));
     }
 
     private void whenArrived() {
@@ -404,7 +416,9 @@ public class OngoingActivity extends AppCompatActivity {
     }
 
     public void changeSlotRequest(final String newSlot, int newSlotId) {
-        final ReservationRequestModel request = new ReservationRequestModel(newSlotId);
+        final ReservationRequestModel request = new ReservationRequestModel();
+        request.setIdSlot(newSlotId);
+        request.setPrice(charge);
         network.changeSlot(idReservation, request, new Network.MyCallback<ReservationResponse>() {
                     @Override
                     public void onSuccess(ReservationResponse response) {
@@ -412,8 +426,11 @@ public class OngoingActivity extends AppCompatActivity {
                                 "Change slot success",
                                 Toast.LENGTH_SHORT).show();
                         //TODO:
+                        ReservationResponse.Data data = response.getData();
+                        float newPrice = data.getPrice();
                         prefManager.setString(SmartParkingSharedPreferences.PREF_SLOT_NAME, newSlot);
                         tvSlotNo.setText(newSlot);
+                        tvPrice.setText(String.valueOf(newPrice));
                         //close dialog
                         confirmDialog.dismiss();
                         whenArrived();

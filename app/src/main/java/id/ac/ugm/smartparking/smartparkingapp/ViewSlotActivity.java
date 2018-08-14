@@ -54,9 +54,6 @@ public class ViewSlotActivity extends AppCompatActivity {
                 Toast.makeText(ViewSlotActivity.this, error, Toast.LENGTH_SHORT).show();
             }
         });
-
-
-
     }
 
     private void generateSlot(List<CheckSlot> data, String slotName) {

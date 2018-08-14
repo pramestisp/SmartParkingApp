@@ -250,8 +250,8 @@ public class Network {
         });
     }
 
-    public void addCharge(final int id_reservation, final MyCallback<ResponseBody> callback) {
-        service.addCharge(id_reservation).enqueue(new Callback<ResponseBody>() {
+    public void addCharge(final int id_reservation, final ReservationRequestModel request, final MyCallback<ResponseBody> callback) {
+        service.addCharge(id_reservation, request).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.isSuccessful()) {

@@ -8,59 +8,9 @@
     tools:context="id.ac.ugm.smartparking.smartparkingapp.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:id="@+id/screen_area">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
-            android:orientation="vertical"
-            android:id="@+id/all_slots">
+    <include layout="@layout/activity_home"/>
 
 
-
-            <include layout="@layout/layout_recyclerview"></include>
-
-
-        </LinearLayout>
-
-        <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:orientation="horizontal"-->
-            <!--android:gravity="center"-->
-            <!--android:layout_alignParentBottom="true">-->
-
-            <!--<Button-->
-                <!--android:id="@+id/bBook"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="Book A Slot"-->
-                <!--android:background="@color/colorAccent"-->
-                <!--android:textColor="#000"/>-->
-
-        <!--</LinearLayout>-->
-
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
-        <Button
-            android:id="@+id/bBook"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Book A Slot"
-            android:background="@color/colorAccent"
-            android:textColor="#000"/>
-
-    </RelativeLayout>
 
 
 </RelativeLayout>
