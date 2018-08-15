@@ -69,4 +69,7 @@ public interface NetworkService {
     @PATCH("reservation/changeslot/{id_reservation}")
     Call<ReservationResponse> changeSlot(@Path("id_reservation") int id_reservation, @Body ReservationRequestModel request);
 
+    @GET("reservation/expired/{id_reservation}")
+    Call<ResponseBody> resExpired(@Path("id_reservation") int id_reservation);
+
 }

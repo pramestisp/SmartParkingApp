@@ -136,8 +136,7 @@ public class OngoingActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     if(!prefManager.getBoolean(SmartParkingSharedPreferences.PREF_ARRIVED)) {
-                        //TODO: TAMBAHKAN SEMUA TAMBAHAN DARI PAK WAYAN DI BAWAH INI
-                        if(currentTime <= (fromTime - 600000) ) {
+                        if(currentTime <= (fromTime - 600000)) {
                             AlertDialog.Builder mBuilder = new AlertDialog.Builder(OngoingActivity.this);
                             mBuilder.setMessage("We didn't expect that you come earlier. You will be charged Rp3.000/hour. Continue?")
                                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -145,50 +144,7 @@ public class OngoingActivity extends AppCompatActivity {
                                         public void onClick(DialogInterface dialog, int which) {
                                             loading.setMessage("Checking slot");
                                             loading.show();
-                                            countCharge();
-                                            network.arrivedCheckSlot(idReservation, new Network.MyCallback<ArrivedCheckSlotResponse>() {
-                                                @Override
-                                                public void onSuccess(ArrivedCheckSlotResponse response) {
-                                                    loading.dismiss();
-                                                    ArrivedCheckSlotResponse.Data data = response.getData();
-                                                    String newSlot = data.getSlotName();
-                                                    int idSlot = data.getIdSlot();
-                                                    Log.e("slot old", String.valueOf(slotNo));
-                                                    Log.e("slot new", String.valueOf(newSlot));
-                                                    Log.e("slot id", String.valueOf(idSlot));
-                                                    if(!newSlot.equals(slotNo)) {
-                                                        confirmChangeDialog(newSlot, idSlot);
-
-                                                    } else {
-                                                        loading.show();
-                                                        final ReservationRequestModel request = new ReservationRequestModel();
-                                                        request.setPrice(charge);
-                                                        network.addCharge(idReservation, request, new Network.MyCallback<ResponseBody>() {
-                                                            @Override
-                                                            public void onSuccess(ResponseBody response) {
-                                                                loading.dismiss();
-                                                                whenArrived();
-                                                            }
-
-                                                            @Override
-                                                            public void onError(String error) {
-                                                                loading.dismiss();
-                                                                Toast.makeText(OngoingActivity.this,
-                                                                        error,
-                                                                        Toast.LENGTH_SHORT).show();
-                                                            }
-                                                        });
-                                                    }
-                                                }
-
-                                                @Override
-                                                public void onError(String error) {
-                                                    loading.dismiss();
-                                                    Toast.makeText(OngoingActivity.this,
-                                                            error,
-                                                            Toast.LENGTH_SHORT).show();
-                                                }
-                                            });
+                                            checkSlot();
                                         }
                                     })
                                     .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -201,7 +157,8 @@ public class OngoingActivity extends AppCompatActivity {
                                     .show();
 
                         } else {
-                            whenArrived();
+                            loading.show();
+                            checkSlot();
                         }
 
                     } else {
@@ -276,17 +233,21 @@ public class OngoingActivity extends AppCompatActivity {
     }
 
     private void countCharge() {
-        float chargePerHour = 3000;
-        double hour = (double) timeLeft / 3600000;
-        double f = 0.5;
-        double hour_rounded = f * Math.ceil(hour / f);
-        Log.e("hour rounded", String.valueOf(hour_rounded));
-        if (hour_rounded <= 0.5 ) {
-            charge = chargePerHour;
+        if(currentTime <= (fromTime - 600000)) {
+            float chargePerHour = 3000;
+            double hour = (double) timeLeft / 3600000;
+            double f = 0.5;
+            double hour_rounded = f * Math.ceil(hour / f);
+            Log.e("hour rounded", String.valueOf(hour_rounded));
+            if (hour_rounded <= 0.5 ) {
+                charge = chargePerHour;
+            } else {
+                charge = (float) (hour_rounded * chargePerHour);
+            }
+            Log.e("charge", String.valueOf(charge));
         } else {
-            charge = (float) (hour_rounded * chargePerHour);
+            charge = 0;
         }
-        Log.e("charge", String.valueOf(charge));
     }
 
     private void whenArrived() {
@@ -313,7 +274,52 @@ public class OngoingActivity extends AppCompatActivity {
         int secondsRemaining = (int) (minremaining % (60));
     }
 
+    private void checkSlot() {
+        network.arrivedCheckSlot(idReservation, new Network.MyCallback<ArrivedCheckSlotResponse>() {
+            @Override
+            public void onSuccess(ArrivedCheckSlotResponse response) {
+                loading.dismiss();
+                ArrivedCheckSlotResponse.Data data = response.getData();
+                String newSlot = data.getSlotName();
+                int idSlot = data.getIdSlot();
+                Log.e("slot old", String.valueOf(slotNo));
+                Log.e("slot new", String.valueOf(newSlot));
+                Log.e("slot id", String.valueOf(idSlot));
+                if(!newSlot.equals(slotNo)) {
+                    confirmChangeDialog(newSlot, idSlot);
 
+                } else {
+                    loading.show();
+                    countCharge();
+                    final ReservationRequestModel request = new ReservationRequestModel();
+                    request.setPrice(charge);
+                    network.addCharge(idReservation, request, new Network.MyCallback<ResponseBody>() {
+                        @Override
+                        public void onSuccess(ResponseBody response) {
+                            loading.dismiss();
+                            whenArrived();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            loading.dismiss();
+                            Toast.makeText(OngoingActivity.this,
+                                    error,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                loading.dismiss();
+                Toast.makeText(OngoingActivity.this,
+                        error,
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 
     private void cancel() {
@@ -395,20 +401,7 @@ public class OngoingActivity extends AppCompatActivity {
 
     }
 
-//    private void Alert(long millis) {
 
-//            //TODO: if parked, panggil api checkslot, reservasi ulang
-
-//
-//
-////                    Vibrator mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-////                    mVibrator.vibrate(300);
-//            builder.setMessage("You got 15 minutes left")
-//                    .setPositiveButton("OK", null).show();
-//            showNotif();
-//        }
-//
-//    }
     public void viewSlot(String slotName) {
         Intent intentView = new Intent(OngoingActivity.this, ViewSlotActivity.class);
         intentView.putExtra("slot_name", slotName);
@@ -416,6 +409,7 @@ public class OngoingActivity extends AppCompatActivity {
     }
 
     public void changeSlotRequest(final String newSlot, int newSlotId) {
+        countCharge();
         final ReservationRequestModel request = new ReservationRequestModel();
         request.setIdSlot(newSlotId);
         request.setPrice(charge);

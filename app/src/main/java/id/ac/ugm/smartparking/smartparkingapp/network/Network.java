@@ -307,5 +307,24 @@ public class Network {
         });
     }
 
+    public void resExpired(final int id_reservation, final MyCallback<ResponseBody> callback) {
+        service.resExpired(id_reservation).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.isSuccessful()) {
+                    callback.onSuccess(response.body());
+                }
+                else {
+                    callback.onError("Cancelling reservation failed");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.onError(t.getLocalizedMessage());
+            }
+        });
+    }
+
 
 }

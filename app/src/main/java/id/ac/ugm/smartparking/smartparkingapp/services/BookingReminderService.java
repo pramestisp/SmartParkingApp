@@ -16,7 +16,9 @@ import android.util.Log;
 import id.ac.ugm.smartparking.smartparkingapp.Notif;
 import id.ac.ugm.smartparking.smartparkingapp.OngoingActivity;
 import id.ac.ugm.smartparking.smartparkingapp.R;
+import id.ac.ugm.smartparking.smartparkingapp.network.Network;
 import id.ac.ugm.smartparking.smartparkingapp.utils.SmartParkingSharedPreferences;
+import okhttp3.ResponseBody;
 
 public class BookingReminderService extends Service {
     SmartParkingSharedPreferences prefManager;
@@ -24,8 +26,10 @@ public class BookingReminderService extends Service {
     IntentFilter intentFilter1, intentFilter2, intentFilter3;
     PendingIntent pendingIntent1, pendingIntent2, pendingIntent3;
     AlarmManager alarmManager;
+    Network network;
     Notif notif;
     long fromTime;
+    int idReservation;
 
     public BookingReminderService() {
     }
@@ -88,12 +92,29 @@ public class BookingReminderService extends Service {
 
         brOvertime = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                notif.updateNotif(context,
-                        "Arrival - Cancelled",
-                        "Your booking is cancelled",
-                        500,
-                        0);
+            public void onReceive(final Context context, Intent intent) {
+                idReservation = prefManager.getInt(SmartParkingSharedPreferences.PREF_ID);
+                network.resExpired(idReservation, new Network.MyCallback<ResponseBody>() {
+                    @Override
+                    public void onSuccess(ResponseBody response) {
+                        notif.updateNotif(context,
+                                "Arrival - Cancelled",
+                                "Your booking is cancelled",
+                                500,
+                                0);
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Log.e("update slot status", String.valueOf(error));
+                        notif.updateNotif(context,
+                                "Arrival - Cancelled",
+                                "Your booking is cancelled but failed when updating slot status",
+                                500,
+                                0);
+                    }
+                });
+
             }
         };
 
