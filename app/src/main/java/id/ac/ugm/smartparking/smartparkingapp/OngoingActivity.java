@@ -424,7 +424,10 @@ public class OngoingActivity extends AppCompatActivity {
                         float newPrice = data.getPrice();
                         prefManager.setString(SmartParkingSharedPreferences.PREF_SLOT_NAME, newSlot);
                         tvSlotNo.setText(newSlot);
-                        tvPrice.setText(String.valueOf(newPrice));
+                        prefManager.setFloat(SmartParkingSharedPreferences.PREF_PRICE, newPrice);
+                        Locale localeID = new Locale("in", "ID");
+                        NumberFormat RpFormat = NumberFormat.getCurrencyInstance(localeID);
+                        tvPrice.setText(RpFormat.format((double)newPrice));
                         //close dialog
                         confirmDialog.dismiss();
                         whenArrived();
