@@ -250,10 +250,10 @@ public class Network {
         });
     }
 
-    public void addCharge(final int id_reservation, final ReservationRequestModel request, final MyCallback<ResponseBody> callback) {
-        service.addCharge(id_reservation, request).enqueue(new Callback<ResponseBody>() {
+    public void addCharge(final int id_reservation, final ReservationRequestModel request, final MyCallback<ReservationResponse> callback) {
+        service.addCharge(id_reservation, request).enqueue(new Callback<ReservationResponse>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<ReservationResponse> call, Response<ReservationResponse> response) {
                 if(response.isSuccessful()) {
                     callback.onSuccess(response.body());
                 } else {
@@ -262,7 +262,7 @@ public class Network {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<ReservationResponse> call, Throwable t) {
                 callback.onError(t.getLocalizedMessage());
 
             }

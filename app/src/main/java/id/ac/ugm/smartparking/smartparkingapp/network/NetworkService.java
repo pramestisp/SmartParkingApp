@@ -60,7 +60,7 @@ public interface NetworkService {
 
     @Headers("Accept: application/json")
     @PATCH("balance/addcharge/{id_reservation}")
-    Call<ResponseBody> addCharge(@Path("id_reservation") int id_reservation, @Body ReservationRequestModel request);
+    Call<ReservationResponse> addCharge(@Path("id_reservation") int id_reservation, @Body ReservationRequestModel request);
 
     @GET("carparkslot/checkslot/{id_reservation}")
     Call<ArrivedCheckSlotResponse> arrivedCheck(@Path("id_reservation") int id_reservation);

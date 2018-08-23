@@ -393,7 +393,7 @@ public class ReservationActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        new Intent(ReservationActivity.this, MainActivity.class);
+        startActivity( new Intent(ReservationActivity.this, MainActivity.class));
     }
 
     @Override

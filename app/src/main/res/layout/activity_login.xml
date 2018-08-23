@@ -138,7 +138,7 @@
                         <EditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Car Type (ex: Honda Jazz, Toyota Avanza)"
+                            android:hint="Car Type (e.g. Honda Jazz, Toyota Avanza)"
                             android:inputType="text"
                             android:id="@+id/etLoginCarModel"
                             android:maxLines="1"

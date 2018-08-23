@@ -250,6 +250,7 @@ public class OngoingActivity extends AppCompatActivity {
         }
     }
 
+
     private void whenArrived() {
         arrived = true;
         prefManager.setBoolean(SmartParkingSharedPreferences.PREF_ARRIVED, arrived);
@@ -260,8 +261,11 @@ public class OngoingActivity extends AppCompatActivity {
         timer.cancel();
         stopService(intentBookingReminder);
         startService(intentParkReminder);
-        start = System.currentTimeMillis();
-        prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_START, start);
+        long arrival = System.currentTimeMillis();
+        prefManager.setLong(SmartParkingSharedPreferences.PREF_TIME_FROM, arrival);
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        Date dateFrom = new Date(arrival);
+        tvArrivalTime.setText(sdf.format(dateFrom));
     }
 
     private void countTime(long stop) {
@@ -293,10 +297,16 @@ public class OngoingActivity extends AppCompatActivity {
                     countCharge();
                     final ReservationRequestModel request = new ReservationRequestModel();
                     request.setPrice(charge);
-                    network.addCharge(idReservation, request, new Network.MyCallback<ResponseBody>() {
+                    network.addCharge(idReservation, request, new Network.MyCallback<ReservationResponse>() {
                         @Override
-                        public void onSuccess(ResponseBody response) {
+                        public void onSuccess(ReservationResponse response) {
                             loading.dismiss();
+                            ReservationResponse.Data data = response.getData();
+                            float newPrice = data.getPrice();
+                            prefManager.setFloat(SmartParkingSharedPreferences.PREF_PRICE, newPrice);
+                            Locale localeID = new Locale("in", "ID");
+                            NumberFormat RpFormat = NumberFormat.getCurrencyInstance(localeID);
+                            tvPrice.setText(RpFormat.format((double)newPrice));
                             whenArrived();
                         }
 
@@ -419,7 +429,6 @@ public class OngoingActivity extends AppCompatActivity {
                         Toast.makeText(OngoingActivity.this,
                                 "Change slot success",
                                 Toast.LENGTH_SHORT).show();
-                        //TODO:
                         ReservationResponse.Data data = response.getData();
                         float newPrice = data.getPrice();
                         prefManager.setString(SmartParkingSharedPreferences.PREF_SLOT_NAME, newSlot);
@@ -487,6 +496,8 @@ public class OngoingActivity extends AppCompatActivity {
             tvTimeCountdown.setVisibility(View.GONE);
             bCancel.setVisibility(View.GONE);
             bArrived.setText("I've left");
+            tvSlotNo.setText(prefManager.getString(SmartParkingSharedPreferences.PREF_SLOT_NAME));
+//            tvPrice(prefManager.get)
 //            bLeft.setVisibility(View.VISIBLE);
         } else {
             tvTimeRemains.setVisibility(View.VISIBLE);
