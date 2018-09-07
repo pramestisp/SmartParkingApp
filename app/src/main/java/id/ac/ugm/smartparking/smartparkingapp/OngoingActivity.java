@@ -113,7 +113,7 @@ public class OngoingActivity extends AppCompatActivity {
         Log.e("timeLeft/difference", String.valueOf(timeLeft));
         Log.e("arrived?", Boolean.toString(prefManager.getBoolean(SmartParkingSharedPreferences.PREF_ARRIVED)));
 
-        if(currentTime >= fromTime + 600000 && !prefManager.getBoolean(SmartParkingSharedPreferences.PREF_ARRIVED)) {
+        if(System.currentTimeMillis() >= fromTime + 600000 && !prefManager.getBoolean(SmartParkingSharedPreferences.PREF_ARRIVED)) {
             cancelRes();
         } else {
 
@@ -136,7 +136,7 @@ public class OngoingActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     if(!prefManager.getBoolean(SmartParkingSharedPreferences.PREF_ARRIVED)) {
-                        if(currentTime <= (fromTime - 600000)) {
+                        if(System.currentTimeMillis() <= (fromTime - 600000)) {
                             AlertDialog.Builder mBuilder = new AlertDialog.Builder(OngoingActivity.this);
                             mBuilder.setMessage("We didn't expect that you come earlier. You will be charged Rp3.000/hour. Continue?")
                                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -233,7 +233,7 @@ public class OngoingActivity extends AppCompatActivity {
     }
 
     private void countCharge() {
-        if(currentTime <= (fromTime - 600000)) {
+        if(System.currentTimeMillis() <= (fromTime - 600000)) {
             float chargePerHour = 3000;
             double hour = (double) timeLeft / 3600000;
             double f = 0.5;
